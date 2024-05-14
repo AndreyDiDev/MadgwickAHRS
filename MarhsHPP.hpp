@@ -45,7 +45,7 @@ typedef struct
     int magneticRecoveryTrigger;
     int magneticRecoveryTimeout;
 
-} Mahrs;
+} MahrsStruct;
 
 typedef struct{
     float accelError;

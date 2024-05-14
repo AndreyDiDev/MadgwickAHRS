@@ -42,7 +42,24 @@ void mahrsInitialisation(Mahrs *const mahrs){
 }
 
 void setParams(Mahrs *const mahrs, const params *const parameters){
+    mahrs->Parameters.algorithmGain = parameters->algorithmGain;
+    mahrs->Parameters.gyroRange = parameters->gyroRange== 0.0f ? FLT_MAX : powf(0.5f * sinf(degToRads(parameters->accelRejection)), 2);
+    mahrs->Parameters.accelRejection = parameters->accelRejection == 0.0f ? FLT_MAX : powf(0.5f * sinf(degToRads(parameters->accelRejection)), 2);
+    mahrs->Parameters.magRejection = parameters->magRejection == 0.0f ? FLT_MAX : powf(0.5f * sinf(degToRads(parameters->magRejection)), 2);
+    mahrs->Parameters.recoveryTriggerPeriod = parameters->recoveryTriggerPeriod;
+    mahrs->accelRecoveryTimeout = mahrs->Parameters.recoveryTriggerPeriod;
+    mahrs->magneticRecoveryTimeout = mahrs->parameters.recoveryTriggerPeriod;
 
+    if(parameters->algorithmGain == 0.0f) || (parameters->recoveryTriggerPeriod == 0)){
+        mahrs->Parameters.accelRejection = FLT_MAX;
+        mahrs->Parameters.magneticRejection = FLT_MAX;
+    }
+
+    if(mahrs->initialisation == false){
+        mahrs->rampedGain = mahrs->Parameters.algorithmGain;
+    }
+
+    mahrs->rampedGainStep = (INITIAL_GAIN - mahrs->Parameters.algorithmGain) / INITIALISATION_PERIOD;
 }
 
 void reset(Mahrs *const mahrs){
@@ -55,6 +72,13 @@ void update() {
 }
 
 // update without magno
+
+
+
+// math
+static inline float degToRads(const float degrees){
+    return degrees *((float) 3.14 / 180.0f);
+}
 
 
 
