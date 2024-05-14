@@ -45,7 +45,24 @@ typedef struct
     int magneticRecoveryTrigger;
     int magneticRecoveryTimeout;
 
-} MahrsStruct;
+} Mahrs;
+
+typedef struct{
+    float accelError;
+    bool accelIgnored;
+    float accelRecoveryTrigger;
+
+    float magneticError;
+    bool magnoIgnored;
+    float magneticRecoveryTrigger;
+} madInternalStates;
+
+typedef struct {
+    bool initialization;
+    bool angularRateRecovery;
+    bool accelRecovery;
+    bool magneticRecovery;
+} madFlags;
 
 
     // math structs
