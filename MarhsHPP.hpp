@@ -19,30 +19,86 @@ typedef struct{
     unsigned int recoveryTriggerPeriod;
 } params;
 
+typedef struct
+{
+    params Parameters;
+    madQuaternion quaternion;
 
-// math structs
-typedef union {
-    float array[3];
+    madVector accel;
+    
+    bool initialisation;
 
-    struct{
-        float roll;
-        float pitch;
-        float yaw;
-    } angle;
-} madEuler;
+    float rampedGain;
+    float rampedGainStep;
 
-typedef union {
-    float array[3];
+    bool angularRateRecovery;
 
-    struct {
-        float x;
-        float y;
-        float z;
-    } axis;
+    madVector halfAccelFeedback;
+    madVector halfMagFeedback;
 
-} madVector;
+    bool accelIgnored;
+    
+    int accelRecoveryTrigger;
+    int accelRecoveryTimeout;
+
+    bool magnoIgnored;
+    int magneticRecoveryTrigger;
+    int magneticRecoveryTimeout;
+
+} MahrsStruct;
 
 
+    // math structs
+    typedef union {
+        float array[3];
+
+        struct{
+            float roll;
+            float pitch;
+            float yaw;
+        } angle;
+    } madEuler;
+
+    typedef union {
+        float array[3];
+
+        struct {
+            float x;
+            float y;
+            float z;
+        } axis;
+
+    } madVector;
+
+    typedef union {
+        float array[4];
+
+        struct{
+            float w;
+            float x;
+            float y;
+            float z;
+        }element;
+    } madQuaternion;
+
+    typedef union{
+        float array[3][3];
+
+        struct{
+            float xx;
+            float xy;
+            float xz;
+
+            float yx;
+            float yy;
+            float yz;
+
+            float zx;
+            float zy;
+            float zz;
+        } element;
+
+    } madMatrix;
 
 // where is sampling period 
 
