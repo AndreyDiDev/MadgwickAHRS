@@ -1,10 +1,10 @@
 // Main Mahrs file to control flow of algorithm 
 
 
-/* Includes ------------------------------------------------------------------*/
+/* Includes/Header Files ------------------------------------------------------------------*/
 #include <math.h>
 #include <float.h> 
-
+#include "MadgwickAHRS\MarhsHPP.hpp"
 
 /* Definitions ------------------------------------------------------------------*/
 
