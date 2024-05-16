@@ -84,15 +84,61 @@ void reset(MahrsStruct *const mahrs){
 void Update(MahrsStruct *const mahrs, const madVector gyro, const madVector accel, const madVector magno, const float deltaT) {
     #define Q mahrs->madQuaternion.element
 
+    mahrs->accel = accel;
+
+    /* Check if the absolute values of  gyro vector (x, y, z) exceed the gyro range.
+    If any of the components exceed the gyro range, it resets. */
+    if((fabsf(gyro.axis.x) > mahrs->Parameters.gyroRange) 
+    || (fabsf(gyro.axis.y) > mahrs->Parameters.gyroRange) 
+    || (fabsf(gyro.axis.z) > mahrs->Parameters.gyroRange)){
+
+        const madQuaternion quaternion = mahrs->quaternion;
+        reset(mahrs);
+        mahrs->quaternion = quaternion;
+        mahrs->angularRateRecovery = true;
+
+    }
+
+    /* Ramp down the gain during the initialization phase of the Mahrs algorithm. */
+    if(mahrs->initialisation){
+        mahrs->rampedGain -= mahrs->rampedGainStep * deltaT;
+        if((mahrs->rampedGain < mahrs->Parameters.algorithmGain) || (mahrs->Parameters.algorithmGain == 0.0f)){
+            mahrs->rampedGain = mahrs->Parameters.algorithmGain;
+            mahrs->initialisation = false;
+            mahrs->angularRateRecovery = false;
+        }
+    }
+
+    // calc gravity 
+    const madVector halfGravityVector = HalfGravity(mahrs);
+
+    // calculate accelerometer feedback
+    madVector halfAccelFeedback = VECTOR_ZERO;
+    mahrs->accelIgnored = true;
+    
+    if(VectorIsZero(accel) == false){
+        // TO DO
+    }
+
 }
 
 // update without magno
 
 
+static inline madVector HalfGravity(const MahrsStruct *const mahrs){
+//TO DO
+}
 
 // math
 static inline float degToRads(const float degrees){
     return degrees *((float) 3.14 / 180.0f);
+}
+
+/**
+ * Returns true if vetor is zero
+*/
+static inline bool VectorIsZero(const madVector vector){
+    return (vector.axis.x == 0.0f) && (vector.axis.y == 0.0f) && (vector.axis.z == 0.0f);
 }
 
 
