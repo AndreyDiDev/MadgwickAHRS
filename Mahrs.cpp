@@ -128,8 +128,70 @@ void Update(MahrsStruct *const mahrs, const madVector gyro, const madVector acce
         }else{
             mahrs->accelRecoveryTrigger += 1;
         }
+
+        // dont ignore accel during accel recovery
+        if(mahrs->accelRecoveryTrigger > mahrs->accelRecoveryTimeout){
+            mahrs->accelRecoveryTimeout = 0;
+            mahrs->accelIgnored = false;
+        } else {
+            mahrs->accelRecoveryTimeout = mahrs->Parameters.recoveryTriggerPeriod;
+        }
+
+        mahrs->accelRecoveryTrigger = Clamp(mahrs->accelRecoveryTrigger, 0, mahrs->Parameters.recoveryTriggerPeriod);
+
+        // apply accel feedback
+        if(mahrs->accelIgnored == false){
+            halfAccelFeedback = mahrs->halfAccelFeedback;
+        }
     }
 
+        // calculate magno feedback
+        madVector halfMagneticFeedback = VECTOR_ZERO;
+        mahrs->magnoIgnored = true;
+
+        if(VectorIsZero(magno) == false){
+
+            // calculate direction of mag field
+            const madVector halfMagneticVector = HalfMagnetic(mahrs);
+
+            // calculate magno feedback and scale by 0.5
+            mahrs->halfMagFeedback = Feedback(vectorNormalise(vectorCrossProduct(halfGravityVector, magno)), halfMagneticVector);
+
+            // dont ignore mango feedback if magnetic error below threshold
+            if(mahrs->initialisation || ((VectorMagSquared(mahrs->halfMagFeedback) <= mahrs->Parameters.magRejection))){
+                mahrs->magnoIgnored = false;
+                mahrs->magneticRecoveryTrigger -= 9;
+            } else {
+                mahrs->magneticRecoveryTrigger += 1;
+            }
+
+            // dont ignore magno during magnetic recovery
+            if(mahrs->magneticRecoveryTrigger > mahrs->magneticRecoveryTimeout){
+                mahrs->magneticRecoveryTimeout = 0;
+                mahrs->magnoIgnored = false;
+            } else {
+                mahrs->magneticRecoveryTimeout = mahrs->Parameters.recoveryTriggerPeriod;
+            }
+            mahrs->magneticRecoveryTrigger = Clamp(mahrs->magneticRecoveryTrigger, 0, mahrs->Parameters.recoveryTriggerPeriod);
+
+            // apply magno feedback
+            if (mahrs->magnoIgnored == false){
+                halfMagneticFeedback = mahrs->halfMagFeedback;
+            }
+        }
+
+        // convert gyro to rads per sec and scale by 0.5
+        const madVector halfGyro = vectorMultiplyScalar(gyro, degToRads(0.5f));
+
+        //apply feedback to gyro
+        const madVector adjustedHalfGyro = vectorAdd(halfGyro, vectorMultiplyScalar(vectorAdd(halfAccelFeedback, halfMagneticFeedback), mahrs->rampedGain));
+
+        // integrate rate of change of quaternion
+        mahrs->quaternion = quaternionAdd(mahrs->quaternion, quaternionMultiplyVector(mahrs->quaternion, vectorMultiplyScalar(adjustedHalfGyro, deltaT)));
+
+        // normalise quaternion
+        mahrs->quaternion = quaternionNormalise(mahrs->quaternion);
+    #undef Q
 }
 
 static inline madVector Feedback(const madVector sensor, const madVector reference){
@@ -139,6 +201,22 @@ static inline madVector Feedback(const madVector sensor, const madVector referen
     }
 
     return vectorCrossProduct(sensor, reference);
+}
+
+static inline madVector HalfMagnetic(const MahrsStruct *const mahrs){
+    #define Q mahrs->quaternion.element
+
+    // second col of transposed rotation matrix scaled by -0.5
+    const madVector halfMagnetic = {.axis = {
+        .x = -1.0f * (Q.x * Q.y + Q.w * Q.z),
+        .y = 0.5f - Q.w * Q.w - Q.y * Q.y,
+        .z = Q.w * Q.x - Q.y * Q.z,
+    }}; 
+
+    return halfMagnetic;
+
+    // maybe compiler warning 
+    #undef Q
 }
 
 // update without magno
