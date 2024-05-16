@@ -117,7 +117,8 @@ typedef struct {
 
     } madMatrix;
 
-// where is sampling period 
+#define VECTOR_ZERO ((madVector){.array = {0.0f, 0.0f, 0.0f} })
+#define IDENTITY_QUATERNION ((madQuaternion){.array = {1.0f, 0.0f, 0.0f, 0.0f} })
 
 /* Macros/Enums ------------------------------------------------------------*/
 
@@ -126,12 +127,11 @@ typedef struct {
 class MahrsHPP
 {
 	public:
+    // function declarations 
+        void mahrsInitialisation(MahrsStruct *const mahrs);
+        void setParams(MahrsStruct *const mahrs, const params *const parameters);
+        void reset(MahrsStruct *const mahrs);
 	protected:
-
-	    void Run(void* pvParams);    // Main run code
-
-	    // void HandleCommand(Command& cm);
-
 	    // Data
 	    // AccelGyroMagnetismData* data;
 
