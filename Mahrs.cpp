@@ -227,6 +227,18 @@ static inline madVector HalfGravity(const MahrsStruct *const mahrs){
 }
 
 // math --------------------------------------------------------------
+static inline int Clamp(const int value, const int min, const int max){
+    if(value < min){
+        return min;
+    }
+
+    if(value > max){
+        return max;
+    }
+
+    return value;
+}
+
 static inline float degToRads(const float degrees){
     return degrees *((float) 3.14 / 180.0f);
 }
