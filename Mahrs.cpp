@@ -465,6 +465,71 @@ static inline madQuaternion quaternionMultiply(const madQuaternion quaternionA, 
 #undef B
 }
 
+// helper functions
+madQuaternion getQuaternion(const MahrsStruct *const mahrs) {
+    return mahrs->quaternion;
+}
+
+void setQuaternion(MahrsStruct *const mahrs, const madQuaternion quaternion) {
+    mahrs->quaternion = quaternion;
+}
+
+madVector getLinearAcceleration(const MahrsStruct *const mahrs) {
+#define Q mahrs->quaternion.element
+
+    // Calculate gravity in the sensor coordinate frame, using NED convention 
+    const madVector gravity = {.axis = {
+            .x = 2.0f * (Q.x * Q.z - Q.w * Q.y),
+            .y = 2.0f * (Q.y * Q.z + Q.w * Q.x),
+            .z = 2.0f * (Q.w * Q.w - 0.5f + Q.z * Q.z),
+    }}; // third column of transposed rotation matrix
+
+    // Remove gravity from accelerometer measurement
+    return vectorAdd(mahrs->accel, gravity);
+
+#undef Q
+}
+
+madVector getEarthAcceleration(const MahrsStruct *const mahrs) {
+    #define Q mahrs->quaternion.element
+    #define A mahrs->accel.axis
+
+    // Calculate accelerometer measurement in the Earth coordinate frame
+    const float qwqw = Q.w * Q.w;
+    const float qwqx = Q.w * Q.x;
+    const float qwqy = Q.w * Q.y;
+    const float qwqz = Q.w * Q.z;
+    const float qxqy = Q.x * Q.y;
+    const float qxqz = Q.x * Q.z;
+    const float qyqz = Q.y * Q.z;
+
+    madVector accelerometerVector = {.axis = {
+            .x = 2.0f * ((qwqw - 0.5f + Q.x * Q.x) * A.x + (qxqy - qwqz) * A.y + (qxqz + qwqy) * A.z),
+            .y = 2.0f * ((qxqy + qwqz) * A.x + (qwqw - 0.5f + Q.y * Q.y) * A.y + (qyqz - qwqx) * A.z),
+            .z = 2.0f * ((qxqz - qwqy) * A.x + (qyqz + qwqx) * A.y + (qwqw - 0.5f + Q.z * Q.z) * A.z),
+    }};
+
+    // Remove gravity from accelerometer measurement
+    accelerometerVector.axis.z += 1.0f;
+
+    return accelerometerVector;
+
+    #undef Q
+    #undef A
+}
+
+madFlags getFlags(const MahrsStruct *const mahrs) {
+    const madFlags flags = {
+            .initialization = mahrs->initialisation,
+            .angularRateRecovery = mahrs->angularRateRecovery,
+            .accelRecovery = mahrs->accelRecoveryTrigger > mahrs->accelRecoveryTimeout,
+            .magneticRecovery= mahrs->magneticRecoveryTrigger > mahrs->magneticRecoveryTimeout,
+    };
+    
+    return flags;
+}
+
+
 
 
 

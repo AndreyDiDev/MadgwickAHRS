@@ -129,6 +129,7 @@ class MahrsHPP
 	public:
     // function declarations 
         void mahrsInitialisation(MahrsStruct *const mahrs);
+
         void setParams(MahrsStruct *const mahrs, const params *const parameters);
         void reset(MahrsStruct *const mahrs);
 
@@ -173,6 +174,17 @@ class MahrsHPP
         static inline madQuaternion quaternionNormalise(const madQuaternion quaternion);
 
         static inline madQuaternion quaternionMultiply(const madQuaternion quaternionA, const madQuaternion quaternionB);
+
+        // other helper functions
+        madQuaternion getQuaternion(const MahrsStruct *const mahrs);
+
+        void setQuaternion(MahrsStruct *const mahrs, const madQuaternion quaternion);
+
+        madVector getLinearAcceleration(const MahrsStruct *const mahrs);
+
+        madVector getEarthAcceleration(const MahrsStruct *const mahrs);
+
+        madFlags getFlags(const MahrsStruct *const mahrs);
 
 	protected:
 	    // Data
