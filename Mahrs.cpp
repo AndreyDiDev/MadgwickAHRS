@@ -17,13 +17,13 @@
 
 /* Function Declarations ------------------------------------------------------------------*/
 
-static inline madVector halfGravity(const MahrsStruct *const mahrs);
+// static inline madVector halfGravity(const MahrsStruct *const mahrs);
 
-static inline madVector halfMagnetic(const MahrsStruct *const mahrs);
+// static inline madVector halfMagnetic(const MahrsStruct *const mahrs);
 
-static inline madVector feedback(const madVector sensor, const madVector reference);
+// static inline madVector feedback(const madVector sensor, const madVector reference);
 
-static inline int clamp(const int value, const int min, const int max);
+// static inline int clamp(const int value, const int min, const int max);
 
 
 /* Functions ------------------------------------------------------------------*/
@@ -243,6 +243,21 @@ static inline float degToRads(const float degrees){
     return degrees *((float) 3.14 / 180.0f);
 }
 
+static inline madVector vectorAdd(const madVector vectorA, const madVector vectorB){
+    #define A vectorA.axis
+    #define B vectorB.axis
+
+    const madVector product = {.axis={
+        .x = A.x + B.x,
+        .y = A.y + B.y,
+        .z = A.z + B.z,
+    }};
+    return product;
+
+    #undef A
+    #undef B
+}
+
 static inline madVector vectorCrossProduct(const madVector vectorA, const madVector vectorB){
 #define A vectorA.axis
 #define B vectorB.axis
@@ -324,6 +339,59 @@ static inline madVector vectorMultiplyScalar(const madVector vector, const float
     }};
     return product;
 
+}
+
+static inline madQuaternion quaternionAdd(const madQuaternion quaternionA, const madQuaternion quaternionB){
+    #define A quaternionA.element
+    #define B quaternionB.element
+
+    const madQuaternion product = {.element ={
+        .w = A.w + B.w,
+        .x = A.x + B.x,
+        .y = A.y + B.y,
+        .z = A.z + B.z,
+    }};
+
+    return product;
+
+    #undef A
+    #undef B
+}
+
+static inline madQuaternion quaternionMultiplyVector(const madQuaternion quaternion, const madVector vector){
+    #define q quaternion.element
+    #define v vector.axis
+
+    const madQuaternion product = {.element{
+        .w = -q.x * v.x - q.y * v.y - q.z * v.z,
+        .x = q.w * v.x + q.y * v.z - q.z * v.y,
+        .y = q.w * v.y - q.x * v.z + q.z * v.x,
+        .z = q.w * v.z + q.x * v.y - q.y * v.x,
+    }};
+    return product;
+
+    #undef q
+    #undef v
+}
+
+static inline madQuaternion quaternionNormalise(const madQuaternion quaternion){
+    #define q quaternion.element
+
+    #ifdef NORMAL_SQRT
+        const float magReciprocal = 1.0f / sqrtf(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
+    #else
+        const float magReciprocal = InverseSquareRoot(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
+    #endif 
+        const madQuaternion product = {.element = {
+            .w = q.w * magReciprocal,
+            .x = q.x * magReciprocal,
+            .y = q.y * magReciprocal,
+            .z = q.z * magReciprocal,
+        }};
+
+    return product;
+
+    #undef q
 }
 
 
