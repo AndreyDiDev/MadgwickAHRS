@@ -134,6 +134,10 @@ class MahrsHPP
 
         void Update(MahrsStruct *const mahrs, const madVector gyro, const madVector accel, const madVector magno, const float deltaT);
 
+        void updateNoMagnometer(MahrsStruct *const mahrs, const madVector gyro, const madVector accel, const float deltaT);
+
+        void updateExternalHeading(MahrsStruct *const mahrs, const madVector gyro, const madVector accel, const float heading, const float deltaT);
+
         static inline madVector Feedback(const madVector sensor, const madVector reference);
 
         static inline madVector HalfMagnetic(const MahrsStruct *const mahrs);
@@ -161,6 +165,15 @@ class MahrsHPP
         static inline float InverseSquareRoot(const float x);
 
         static inline madVector vectorMultiplyScalar(const madVector vector, const float scalar);
+
+        static inline madQuaternion quaternionAdd(const madQuaternion quaternionA, const madQuaternion quaternionB);
+
+        static inline madQuaternion quaternionMultiplyVector(const madQuaternion quaternion, const madVector vector);
+
+        static inline madQuaternion quaternionNormalise(const madQuaternion quaternion);
+
+        static inline madQuaternion quaternionMultiply(const madQuaternion quaternionA, const madQuaternion quaternionB);
+
 	protected:
 	    // Data
 	    // AccelGyroMagnetismData* data;

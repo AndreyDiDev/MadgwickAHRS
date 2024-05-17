@@ -194,9 +194,54 @@ void Update(MahrsStruct *const mahrs, const madVector gyro, const madVector acce
     #undef Q
 }
 
+void updateNoMagnometer(MahrsStruct *const mahrs, const madVector gyro, const madVector accel, const float deltaT){
+    Update(mahrs, gyro, accel, VECTOR_ZERO, deltaT);
+
+    // zero heading during initialisation
+    if(mahrs->initialisation){
+        setHeading(mahrs, 0.0f);
+    }
+}
+
+void updateExternalHeading(MahrsStruct *const mahrs, const madVector gyro, const madVector accel, const float heading, const float deltaT){
+    #define q mahrs->quaternion.element
+
+    // calculate roll
+    const float roll = atan2f(q.w * q.x + q.y * q.z, 0.5f -q.y * q.y - q.x * q.x);
+
+    // calculate magnetometer
+    const float headingRads = degToRads(heading);
+    const float sinHeadingRads = sinf(headingRads);
+    const madVector magno = {.axis = {
+        .x = cosf(headingRads),
+        .y = -1.0f * cosf(roll) * sinHeadingRads,
+        .z = sinHeadingRads * sinf(roll),
+    }};
+
+    // update algorithm
+    Update(mahrs, gyro, accel, magno, deltaT);
+
+    #undef q
+}
+
+void setHeading(MahrsStruct *const mahrs, const float heading){
+    #define q mahrs->quaternion.element
+
+    const float yaw = atan2f(q.w * q.z + q.x * q.y, 0.5f - q.y * q.y - q.z * q.z);
+    const float halfYawMinusHeading = 0.5f * (yaw - degToRads(heading));
+    const madQuaternion rotation = {.element = {
+        .w = cosf(halfYawMinusHeading),
+        .x = 0.0f,
+        .y = 0.0f,
+        .z = -1.0f * sinf(halfYawMinusHeading),
+    }};
+
+    mahrs->quaternion = quaternionMultiply(rotation, mahrs->quaternion);
+}
+
 static inline madVector Feedback(const madVector sensor, const madVector reference){
 
-    if(vectorDotProduct(sensor, reference) < 0.0f){
+    if(vectorDotProduct(sensor, reference) < 0.0f){ // if error is >90 degrees
         return vectorNormalise(vectorCrossProduct(sensor, reference));
     }
 
@@ -221,9 +266,19 @@ static inline madVector HalfMagnetic(const MahrsStruct *const mahrs){
 
 // update without magno
 
-
+// gives half graivty in the NED convention 
 static inline madVector HalfGravity(const MahrsStruct *const mahrs){
-//TO DO
+    #define q mahrs->quaternion.element
+
+    // third col scaled by -0.5
+    const madVector halfGravity = {.axis ={
+        .x = q.x * q.z - q.w * q.y,
+        .y = q.y * q.z + q.w * q.x,
+        .z = q.w * q.w - 0.5f + q.z * q.z,
+    }};
+    return halfGravity;
+
+    #undef q
 }
 
 // math --------------------------------------------------------------
@@ -392,6 +447,22 @@ static inline madQuaternion quaternionNormalise(const madQuaternion quaternion){
     return product;
 
     #undef q
+}
+
+static inline madQuaternion quaternionMultiply(const madQuaternion quaternionA, const madQuaternion quaternionB) {
+#define A quaternionA.element
+#define B quaternionB.element
+
+    const madQuaternion result = {.element = {
+            .w = A.w * B.w - A.x * B.x - A.y * B.y - A.z * B.z,
+            .x = A.w * B.x + A.x * B.w + A.y * B.z - A.z * B.y,
+            .y = A.w * B.y - A.x * B.z + A.y * B.w + A.z * B.x,
+            .z = A.w * B.z + A.x * B.y - A.y * B.x + A.z * B.w,
+    }};
+    return result;
+
+#undef A
+#undef B
 }
 
 
