@@ -1,13 +1,14 @@
 #ifndef FLAGS_H
 #define FLAGS_H
 
-#include "../../Fusion/Fusion.h"
+// #include "../../Fusion/Fusion.h"
 #include "Helpers.h"
 #include <Python.h>
+#include "../AHRSRepo/MadgwickAHRS/MarhsHPP.hpp"
 
 typedef struct {
     PyObject_HEAD
-    FusionAhrsFlags flags;
+    madFlags flags;
 } Flags;
 
 static void flags_free(Flags *self) {
@@ -15,19 +16,19 @@ static void flags_free(Flags *self) {
 }
 
 static PyObject *flags_get_initialising(Flags *self) {
-    return build_bool(self->flags.initialising);
+    return build_bool(self->madFlags.initialisation);
 }
 
 static PyObject *flags_get_angular_rate_recovery(Flags *self) {
-    return build_bool(self->flags.angularRateRecovery);
+    return build_bool(self->madFlags.angularRateRecovery);
 }
 
 static PyObject *flags_get_acceleration_recovery(Flags *self) {
-    return build_bool(self->flags.accelerationRecovery);
+    return build_bool(self->madFlags.accelerationRecovery);
 }
 
 static PyObject *flags_get_magnetic_recovery(Flags *self) {
-    return build_bool(self->flags.magneticRecovery);
+    return build_bool(self->madFlags.magneticRecovery);
 }
 
 static PyGetSetDef flags_get_set[] = {

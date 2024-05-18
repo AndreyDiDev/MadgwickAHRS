@@ -1,13 +1,14 @@
-#include "Ahrs.h"
-#include "Axes.h"
-#include "Compass.h"
-#include "Flags.h"
-#include "InternalStates.h"
+// #include "Ahrs.h"
+// #include "Axes.h"
+// #include "Compass.h"
+// #include "Flags.h"
+// #include "InternalStates.h"
 #include <numpy/arrayobject.h>
-#include "Offset.h"
+// #include "Offset.h"
 #include <Python.h>
-#include "Quaternion.h"
-#include "Settings.h"
+// #include "Quaternion.h"
+// #include "Settings.h"
+#include "../AHRSRepo/MadgwickAHRS/MarhsHPP.hpp"
 
 static struct PyModuleDef config = {
         PyModuleDef_HEAD_INIT,

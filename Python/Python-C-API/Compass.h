@@ -1,25 +1,26 @@
 #ifndef COMPASS_H
 #define COMPASS_H
 
-#include "../../Fusion/Fusion.h"
+// #include "../../Fusion/Fusion.h"
+#include "../AHRSRepo/MadgwickAHRS/MarhsHPP.hpp"
 #include "Helpers.h"
 #include <numpy/arrayobject.h>
 #include <Python.h>
 #include <stdlib.h>
 
 static PyObject *compass_calculate_heading(PyObject *self, PyObject *args) {
-    FusionConvention convention;
+    // FusionConvention convention;
     PyArrayObject *accelerometer_array;
     PyArrayObject *magnetometer_array;
 
-    const char *error = PARSE_TUPLE(args, "iO!O!", &convention, &PyArray_Type, &accelerometer_array, &PyArray_Type, &magnetometer_array);
+    const char *error = PARSE_TUPLE(args, "iO!O!", &PyArray_Type, &accelerometer_array, &PyArray_Type, &magnetometer_array);
     if (error != NULL) {
         PyErr_SetString(PyExc_TypeError, error);
         return NULL;
     }
 
-    FusionVector accelerometer_vector;
-    FusionVector magnetometer_vector;
+    madVector accelerometer_vector;
+    madVector magnetometer_vector;
 
     error = parse_array(accelerometer_vector.array, accelerometer_array, 3);
     if (error != NULL) {
@@ -33,7 +34,7 @@ static PyObject *compass_calculate_heading(PyObject *self, PyObject *args) {
         return NULL;
     }
 
-    return Py_BuildValue("f", FusionCompassCalculateHeading(convention, accelerometer_vector, magnetometer_vector));
+    return Py_BuildValue("f", compassCalculateHeading(accelerometer_vector, magnetometer_vector));
 }
 
 static PyMethodDef compass_methods[] = {

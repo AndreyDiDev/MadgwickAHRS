@@ -585,6 +585,42 @@ void setQuaternion(MahrsStruct *const mahrs, const madQuaternion quaternion) {
     mahrs->quaternion = quaternion;
 }
 
+static inline madMatrix quaternionToMatrix(const madQuaternion quaternion) {
+#define Q quaternion.element
+    const float qwqw = Q.w * Q.w; // calculate common terms to avoid repeated operations
+    const float qwqx = Q.w * Q.x;
+    const float qwqy = Q.w * Q.y;
+    const float qwqz = Q.w * Q.z;
+    const float qxqy = Q.x * Q.y;
+    const float qxqz = Q.x * Q.z;
+    const float qyqz = Q.y * Q.z;
+    const madMatrix matrix = {.element = {
+            .xx = 2.0f * (qwqw - 0.5f + Q.x * Q.x),
+            .xy = 2.0f * (qxqy - qwqz),
+            .xz = 2.0f * (qxqz + qwqy),
+            .yx = 2.0f * (qxqy + qwqz),
+            .yy = 2.0f * (qwqw - 0.5f + Q.y * Q.y),
+            .yz = 2.0f * (qyqz - qwqx),
+            .zx = 2.0f * (qxqz - qwqy),
+            .zy = 2.0f * (qyqz + qwqx),
+            .zz = 2.0f * (qwqw - 0.5f + Q.z * Q.z),
+    }};
+    return matrix;
+#undef Q
+}
+
+static inline madEuler quaternionToEuler(const madQuaternion quaternion) {
+#define Q quaternion.element
+    const float halfMinusQySquared = 0.5f - Q.y * Q.y; // calculate common terms to avoid repeated operations
+    const madEuler euler = {.angle = {
+            .roll = radsToDeg(atan2f(Q.w * Q.x + Q.y * Q.z, halfMinusQySquared - Q.x * Q.x)),
+            .pitch = radsToDeg(Asin(2.0f * (Q.w * Q.y - Q.z * Q.x))),
+            .yaw = radsToDeg(atan2f(Q.w * Q.z + Q.x * Q.y, halfMinusQySquared - Q.z * Q.z)),
+    }};
+    return euler;
+#undef Q
+}
+
 madVector getLinearAcceleration(const MahrsStruct *const mahrs) {
 #define Q mahrs->quaternion.element
 
@@ -650,6 +686,13 @@ madInternalStates getInternalStates(const MahrsStruct *const mahrs){
             .magneticRecoveryTrigger = mahrs->Parameters.recoveryTriggerPeriod == 0 ? 0.0f : (float) mahrs->magneticRecoveryTrigger / (float) mahrs->Parameters.recoveryTriggerPeriod,
     };
     return internalStates;
+}
+
+float compassCalculateHeading(const madVector accelerometer, const madVector magnetometer) {
+    const madVector up = vectorMultiplyScalar(accelerometer, -1.0f);
+    const madVector west = vectorNormalise(vectorCrossProduct(up, magnetometer));
+    const madVector north = vectorNormalise(vectorCrossProduct(west, up));
+    return radsToDeg(atan2f(west.axis.x, north.axis.x));
 }
 
 

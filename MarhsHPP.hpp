@@ -215,6 +215,12 @@ class MahrsHPP
 
         madFlags getFlags(const MahrsStruct *const mahrs);
 
+        static inline madMatrix quaternionToMatrix(const madQuaternion quaternion);
+
+        static inline madEuler quaternionToEuler(const madQuaternion quaternion);
+
+        float compassCalculateHeading(const madVector accelerometer, const madVector magnetometer);
+
 	protected:
 	    // Data
 	    // AccelGyroMagnetismData* data;

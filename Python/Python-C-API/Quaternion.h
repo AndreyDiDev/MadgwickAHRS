@@ -1,15 +1,16 @@
 #ifndef QUATERNION_H
 #define QUATERNION_H
 
-#include "../../Fusion/Fusion.h"
-#include "Helpers.h"
+// #include "../../Fusion/Fusion.h"
+// #include "Helpers.h"
+#include "../AHRSRepo/MadgwickAHRS/MarhsHPP.hpp"
 #include <numpy/arrayobject.h>
 #include <Python.h>
 #include <stdlib.h>
 
 typedef struct {
     PyObject_HEAD
-    FusionQuaternion quaternion;
+    madQuaternion quaternion;
 } Quaternion;
 
 static PyObject *quaternion_new(PyTypeObject *subtype, PyObject *args, PyObject *keywords) {
@@ -21,7 +22,7 @@ static PyObject *quaternion_new(PyTypeObject *subtype, PyObject *args, PyObject 
         return NULL;
     }
 
-    FusionQuaternion quaternion;
+    madQuaternion quaternion;
 
     error = parse_array(quaternion.array, array, 4);
     if (error != NULL) {
@@ -60,8 +61,8 @@ static PyObject *quaternion_get_z(Quaternion *self) {
 }
 
 static PyObject *quaternion_to_matrix(Quaternion *self, PyObject *args) {
-    FusionMatrix *const matrix = malloc(sizeof(FusionMatrix));
-    *matrix = FusionQuaternionToMatrix(self->quaternion);
+    madMatrix *const matrix = malloc(sizeof(madMatrix));
+    *matrix = quaternionToMatrix(self->quaternion);
 
     const npy_intp dims[] = {3, 3};
     PyObject *array = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT, matrix->array);
@@ -70,8 +71,8 @@ static PyObject *quaternion_to_matrix(Quaternion *self, PyObject *args) {
 }
 
 static PyObject *quaternion_to_euler(Quaternion *self, PyObject *args) {
-    FusionEuler *const euler = malloc(sizeof(FusionEuler));
-    *euler = FusionQuaternionToEuler(self->quaternion);
+    madEuler *const euler = malloc(sizeof(madEuler));
+    *euler = quaternionToEuler(self->quaternion);
 
     const npy_intp dims[] = {3};
     PyObject *array = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT, euler->array);

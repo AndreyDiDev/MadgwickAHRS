@@ -246,16 +246,7 @@ FusionVector FusionAhrsGetLinearAcceleration(const MahrsStruct *const ahrs) {
     }}; // third column of transposed rotation matrix
 
     // Remove gravity from accelerometer measurement
-    switch (ahrs->settings.convention) {
-        case FusionConventionNwu:
-        case FusionConventionEnu: {
-            return FusionVectorSubtract(ahrs->accelerometer, gravity);
-        }
-        case FusionConventionNed: {
-            return FusionVectorAdd(ahrs->accelerometer, gravity);
-        }
-    }
-    return FUSION_VECTOR_ZERO; // avoid compiler warning
+    return FusionVectorAdd(ahrs->accelerometer, gravity);
 #undef Q
 }
 

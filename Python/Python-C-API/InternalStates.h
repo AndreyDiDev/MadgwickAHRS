@@ -1,13 +1,14 @@
 #ifndef INTERNAL_STATES_H
 #define INTERNAL_STATES_H
 
-#include "../../Fusion/Fusion.h"
+// #include "../../Fusion/Fusion.h"
+#include "../AHRSRepo/MadgwickAHRS/MarhsHPP.hpp"
 #include "Helpers.h"
 #include <Python.h>
 
 typedef struct {
     PyObject_HEAD
-    FusionAhrsInternalStates internal_states;
+    madInternalStates internal_states;
 } InternalStates;
 
 static void internal_states_free(InternalStates *self) {
@@ -15,11 +16,11 @@ static void internal_states_free(InternalStates *self) {
 }
 
 static PyObject *internal_states_get_acceleration_error(InternalStates *self) {
-    return Py_BuildValue("f", self->internal_states.accelerationError);
+    return Py_BuildValue("f", self->internal_states.accelError);
 }
 
 static PyObject *internal_states_get_accelerometer_ignored(InternalStates *self) {
-    return build_bool(self->internal_states.accelerometerIgnored);
+    return build_bool(self->internal_states.accelIgnored);
 }
 
 static PyObject *internal_states_get_acceleration_recovery_trigger(InternalStates *self) {
@@ -31,7 +32,7 @@ static PyObject *internal_states_get_magnetic_error(InternalStates *self) {
 }
 
 static PyObject *internal_states_get_magnetometer_ignored(InternalStates *self) {
-    return build_bool(self->internal_states.magnetometerIgnored);
+    return build_bool(self->internal_states.magnoIgnored);
 }
 
 static PyObject *internal_states_get_magnetic_recovery_trigger(InternalStates *self) {

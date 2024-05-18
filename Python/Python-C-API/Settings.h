@@ -14,7 +14,7 @@ typedef struct {
 static PyObject *settings_new(PyTypeObject *subtype, PyObject *args, PyObject *keywords) {
     Settings *const self = (Settings *) subtype->tp_alloc(subtype, 0);
 
-    const char *const error = PARSE_TUPLE(args, "iffffI", &self->settings.convention, &self->settings.gain, &self->settings.gyroscopeRange, &self->settings.accelerationRejection, &self->settings.magneticRejection, &self->settings.recoveryTriggerPeriod);
+    const char *const error = PARSE_TUPLE(args, "iffffI", &self->Parameters.algorithmGain, &self->Parameters.gyroRange, &self->Parameters.accelRejection, &self->Parameters.magRejection, &self->Parameters.recoveryTriggerPeriod);
     if (error != NULL) {
         PyErr_SetString(PyExc_TypeError, error);
         return NULL;
@@ -42,7 +42,7 @@ static void settings_free(Settings *self) {
 // }
 
 static PyObject *settings_get_gain(Settings *self) {
-    return Py_BuildValue("f", self->settings.gain);
+    return Py_BuildValue("f", self->Parameters.algorithmGain);
 }
 
 static int settings_set_gain(Settings *self, PyObject *value, void *closure) {
@@ -52,12 +52,12 @@ static int settings_set_gain(Settings *self, PyObject *value, void *closure) {
         return -1;
     }
 
-    self->settings.gain = gain;
+    self->Parameters.algorithmGain = gain;
     return 0;
 }
 
 static PyObject *settings_get_gyroscope_range(Settings *self) {
-    return Py_BuildValue("f", self->settings.gyroscopeRange);
+    return Py_BuildValue("f", self->Parameters.gyroRange);
 }
 
 static int settings_set_gyroscope_range(Settings *self, PyObject *value, void *closure) {
@@ -67,12 +67,12 @@ static int settings_set_gyroscope_range(Settings *self, PyObject *value, void *c
         return -1;
     }
 
-    self->settings.gyroscopeRange = gyroscope_range;
+    self->Parameters.gyroRange = gyroscope_range;
     return 0;
 }
 
 static PyObject *settings_get_acceleration_rejection(Settings *self) {
-    return Py_BuildValue("f", self->settings.accelerationRejection);
+    return Py_BuildValue("f", self->Parameters.accelRejection);
 }
 
 static int settings_set_acceleration_rejection(Settings *self, PyObject *value, void *closure) {
@@ -82,12 +82,12 @@ static int settings_set_acceleration_rejection(Settings *self, PyObject *value, 
         return -1;
     }
 
-    self->settings.accelerationRejection = acceleration_rejection;
+    self->Parameters.accelRejection = acceleration_rejection;
     return 0;
 }
 
 static PyObject *settings_get_magnetic_rejection(Settings *self) {
-    return Py_BuildValue("f", self->settings.magneticRejection);
+    return Py_BuildValue("f", self->Parameters.magRejection);
 }
 
 static int settings_set_magnetic_rejection(Settings *self, PyObject *value, void *closure) {
@@ -97,12 +97,12 @@ static int settings_set_magnetic_rejection(Settings *self, PyObject *value, void
         return -1;
     }
 
-    self->settings.magneticRejection = magnetic_rejection;
+    self->Parameters.magRejection = magnetic_rejection;
     return 0;
 }
 
 static PyObject *settings_get_recovery_trigger_period(Settings *self) {
-    return Py_BuildValue("I", self->settings.recoveryTriggerPeriod);
+    return Py_BuildValue("I", self->Parameters.recoveryTriggerPeriod);
 }
 
 static int settings_set_recovery_trigger_period(Settings *self, PyObject *value, void *closure) {
@@ -112,12 +112,12 @@ static int settings_set_recovery_trigger_period(Settings *self, PyObject *value,
         return -1;
     }
 
-    self->settings.recoveryTriggerPeriod = recovery_trigger_period;
+    self->Parameters.recoveryTriggerPeriod = recovery_trigger_period;
     return 0;
 }
 
 static PyGetSetDef settings_get_set[] = {
-        {"convention",              (getter) settings_get_convention,              (setter) settings_set_convention,              "", NULL},
+        // {"convention",              (getter) settings_get_convention,              (setter) settings_set_convention,              "", NULL},
         {"gain",                    (getter) settings_get_gain,                    (setter) settings_set_gain,                    "", NULL},
         {"gyroscope_range",         (getter) settings_get_gyroscope_range,         (setter) settings_set_gyroscope_range,         "", NULL},
         {"acceleration_rejection",  (getter) settings_get_acceleration_rejection,  (setter) settings_set_acceleration_rejection,  "", NULL},
