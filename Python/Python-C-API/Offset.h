@@ -23,7 +23,7 @@ static PyObject *offset_new(PyTypeObject *subtype, PyObject *args, PyObject *key
     }
 
     Offset *const self = (Offset *) subtype->tp_alloc(subtype, 0);
-    offsetInitialise(&self->madOffset, sample_rate);
+    offsetInitialise(&self->offset, sample_rate);
     return (PyObject *) self;
 }
 
@@ -49,7 +49,7 @@ static PyObject *offset_update(Offset *self, PyObject *args) {
     }
 
     madVector *const output_vector = malloc(sizeof(madVector));
-    *output_vector = offsetUpdate(&self->madOffset, input_vector);
+    *output_vector = offsetUpdate(&self->offset, input_vector);
 
     const npy_intp dims[] = {3};
     PyObject *output_array = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT, output_vector->array);

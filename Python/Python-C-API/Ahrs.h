@@ -235,7 +235,7 @@ static PyTypeObject ahrs_object = {
         .tp_methods = ahrs_methods,
 };
 
-FusionVector FusionAhrsGetLinearAcceleration(const MahrsStruct *const ahrs) {
+madVector getLinearAcceleration(const MahrsStruct *const ahrs) {
 #define Q ahrs->quaternion.element
 
     // Calculate gravity in the sensor coordinate frame
@@ -246,7 +246,7 @@ FusionVector FusionAhrsGetLinearAcceleration(const MahrsStruct *const ahrs) {
     }}; // third column of transposed rotation matrix
 
     // Remove gravity from accelerometer measurement
-    return FusionVectorAdd(ahrs->accelerometer, gravity);
+    return vectorAdd(ahrs->accel, gravity);
 #undef Q
 }
 
