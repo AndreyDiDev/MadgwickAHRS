@@ -140,7 +140,7 @@ class MahrsHPP
         void mahrsInitialisation(MahrsStruct *const mahrs);
 
         void setParams(MahrsStruct *const mahrs, const params *const parameters);
-        void reset(MahrsStruct *const mahrs);
+        void madReset(MahrsStruct *const mahrs);
 
         void offsetInitialise(madOffset *const offset, const unsigned int sampleRate);
 
@@ -150,7 +150,7 @@ class MahrsHPP
 
         void Update(MahrsStruct *const mahrs, const madVector gyro, const madVector accel, const madVector magno, const float deltaT);
 
-        void updateNoMagnometer(MahrsStruct *const mahrs, const madVector gyro, const madVector accel, const float deltaT);
+        void updateNoMagnetometer(MahrsStruct *const mahrs, const madVector gyro, const madVector accel, const float deltaT);
 
         void updateExternalHeading(MahrsStruct *const mahrs, const madVector gyro, const madVector accel, const float heading, const float deltaT);
 
@@ -160,9 +160,21 @@ class MahrsHPP
 
         static inline madVector HalfGravity(const MahrsStruct *const mahrs);
 
+        madVector getLinearAcceleration(const MahrsStruct *const mahrs);
+
+        madVector getEarthAcceleration(const MahrsStruct *const mahrs);
+
+        // math 
+
         static inline int Clamp(const int value, const int min, const int max);
 
         static inline float degToRads(const float degrees);
+
+        static inline float Asin(const float value);
+
+        static inline float vectorMagnitudeSquared(const madVector vector);
+
+        static inline float vectorMagnitude(const madVector vector);
 
         static inline madVector vectorCrossProduct(const madVector vectorA, const madVector vectorB);
 

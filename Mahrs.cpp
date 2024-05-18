@@ -54,7 +54,7 @@ void mahrsInitialisation(MahrsStruct *const mahrs){
     };
 
     setParams(mahrs, &parameters);
-    reset(mahrs);
+    madReset(mahrs);
 }
 
 void setParams(MahrsStruct *const mahrs, const params *const parameters){
@@ -79,7 +79,7 @@ void setParams(MahrsStruct *const mahrs, const params *const parameters){
 }
 
 // resets the ahrs 
-void reset(MahrsStruct *const mahrs){
+void madReset(MahrsStruct *const mahrs){
     mahrs->quaternion = IDENTITY_QUATERNION;
     mahrs->accel = VECTOR_ZERO;
     mahrs->initialisation = true;
@@ -139,7 +139,7 @@ void Update(MahrsStruct *const mahrs, const madVector gyro, const madVector acce
     || (fabsf(gyro.axis.z) > mahrs->Parameters.gyroRange)){
 
         const madQuaternion quaternion = mahrs->quaternion;
-        reset(mahrs);
+        madReset(mahrs);
         mahrs->quaternion = quaternion;
         mahrs->angularRateRecovery = true;
 
@@ -240,7 +240,7 @@ void Update(MahrsStruct *const mahrs, const madVector gyro, const madVector acce
     #undef Q
 }
 
-void updateNoMagnometer(MahrsStruct *const mahrs, const madVector gyro, const madVector accel, const float deltaT){
+void updateNoMagnetometer(MahrsStruct *const mahrs, const madVector gyro, const madVector accel, const float deltaT){
     Update(mahrs, gyro, accel, VECTOR_ZERO, deltaT);
 
     // zero heading during initialisation
@@ -325,6 +325,21 @@ static inline madVector HalfGravity(const MahrsStruct *const mahrs){
     #undef q
 }
 
+madVector getLinearAcceleration(const MahrsStruct *const mahrs){
+    #define q mahrs->quaternion.element
+
+    // calc gravity from the sensor's coordinate system
+    const madVector gravityVector = {.axis ={
+        .x = 2.0f * (q.x * q.z - q.w * q.y),
+        .y = 2.0f * (q.y * q.z + q.w * q.x),
+        .z = 2.0f * (q.w * q.w - 0.5f + q.z * q.z),
+    }}; // third column is transposed 
+
+    return vectorAdd(mahrs->accel, gravityVector);
+
+    #undef q
+}
+
 // math --------------------------------------------------------------
 static inline int Clamp(const int value, const int min, const int max){
     if(value < min){
@@ -339,7 +354,44 @@ static inline int Clamp(const int value, const int min, const int max){
 }
 
 static inline float degToRads(const float degrees){
-    return degrees *((float) 3.14 / 180.0f);
+    return degrees *((float) M_PI / 180.0f);
+}
+
+/**
+ * @brief Converts radians to degrees.
+ * @param radians Radians.
+ * @return Degrees.
+ */
+static inline float radsToDeg(const float radians) {
+    return radians * (180.0f / (float) M_PI);
+}
+
+static inline float Asin(const float value) {
+    if (value <= -1.0f) {
+        return (float) M_PI / -2.0f;
+    }
+    if (value >= 1.0f) {
+        return (float) M_PI / 2.0f;
+    }
+    return asinf(value);
+}
+
+/**
+ * @brief Returns the vector magnitude.
+ * @param vector Vector.
+ * @return Vector magnitude.
+ */
+static inline float vectorMagnitude(const madVector vector) {
+    return sqrtf(vectorMagnitudeSquared(vector));
+}
+
+/**
+ * @brief Returns the vector magnitude squared.
+ * @param vector Vector.
+ * @return Vector magnitude squared.
+ */
+static inline float vectorMagnitudeSquared(const madVector vector) {
+    return vectorSum(vectorHadamarProduct(vector, vector));
 }
 
 static inline madVector vectorAdd(const madVector vectorA, const madVector vectorB){
@@ -586,6 +638,18 @@ madFlags getFlags(const MahrsStruct *const mahrs) {
     };
 
     return flags;
+}
+
+madInternalStates getInternalStates(const MahrsStruct *const mahrs){
+    const madInternalStates internalStates = {
+            .accelError = radsToDeg(Asin(2.0f * vectorMagnitude(mahrs->halfAccelFeedback))),
+            .accelIgnored = mahrs->accelIgnored,
+            .accelRecoveryTrigger = mahrs->Parameters.recoveryTriggerPeriod == 0 ? 0.0f : (float) mahrs->accelRecoveryTrigger / (float) mahrs->Parameters.recoveryTriggerPeriod,
+            .magneticError = radsToDeg(Asin(2.0f * vectorMagnitude(mahrs->halfMagFeedback))),
+            .magnoIgnored = mahrs->magnoIgnored,
+            .magneticRecoveryTrigger = mahrs->Parameters.recoveryTriggerPeriod == 0 ? 0.0f : (float) mahrs->magneticRecoveryTrigger / (float) mahrs->Parameters.recoveryTriggerPeriod,
+    };
+    return internalStates;
 }
 
 

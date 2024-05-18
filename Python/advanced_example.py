@@ -19,8 +19,7 @@ ahrs = imufusion.Ahrs()
 
 
 
-ahrs.settings = imufusion.Settings(imufusion.CONVENTION_ENU,  # convention
-                                   0.5,  # gain
+ahrs.settings = imufusion.Settings(imufusion.0.5,  # gain
                                    2000,  # gyroscope range
                                    10,  # acceleration rejection
                                    10,  # magnetic rejection

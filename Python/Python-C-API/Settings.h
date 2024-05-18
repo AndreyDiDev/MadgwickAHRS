@@ -1,13 +1,14 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include "../../Fusion/Fusion.h"
+// #include "../../Fusion/Fusion.h"
+#include "../AHRSRepo/MadgwickAHRS/MarhsHPP.hpp"
 #include "Helpers.h"
 #include <Python.h>
 
 typedef struct {
     PyObject_HEAD
-    FusionAhrsSettings settings;
+    params settings;
 } Settings;
 
 static PyObject *settings_new(PyTypeObject *subtype, PyObject *args, PyObject *keywords) {
@@ -25,20 +26,20 @@ static void settings_free(Settings *self) {
     Py_TYPE(self)->tp_free(self);
 }
 
-static PyObject *settings_get_convention(Settings *self) {
-    return Py_BuildValue("l", self->settings.convention);
-}
+// static PyObject *settings_get_convention(Settings *self) {
+//     return Py_BuildValue("l", self->settings.convention);
+// }
 
-static int settings_set_convention(Settings *self, PyObject *value, void *closure) {
-    const FusionConvention convention = (FusionConvention) PyFloat_AsDouble(value);
+// static int settings_set_convention(Settings *self, PyObject *value, void *closure) {
+//     const FusionConvention convention = (FusionConvention) PyFloat_AsDouble(value);
 
-    if (PyErr_Occurred()) {
-        return -1;
-    }
+//     if (PyErr_Occurred()) {
+//         return -1;
+//     }
 
-    self->settings.convention = convention;
-    return 0;
-}
+//     self->settings.convention = convention;
+//     return 0;
+// }
 
 static PyObject *settings_get_gain(Settings *self) {
     return Py_BuildValue("f", self->settings.gain);
