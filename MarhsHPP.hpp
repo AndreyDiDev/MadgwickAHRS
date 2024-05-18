@@ -64,6 +64,13 @@ typedef struct {
     bool magneticRecovery;
 } madFlags;
 
+typedef struct {
+    float filterCoefficient;
+    unsigned int timeout;
+    unsigned int timer;
+    madVector gyroscopeOffset;
+} madOffset;
+
 
     // math structs
     typedef union {
@@ -128,10 +135,18 @@ class MahrsHPP
 {
 	public:
     // function declarations 
+
+        // setup functions 
         void mahrsInitialisation(MahrsStruct *const mahrs);
 
         void setParams(MahrsStruct *const mahrs, const params *const parameters);
         void reset(MahrsStruct *const mahrs);
+
+        void offsetInitialise(madOffset *const offset, const unsigned int sampleRate);
+
+        madVector offsetUpdate(madOffset *const offset, madVector gyro);
+
+        // algorithm functions 
 
         void Update(MahrsStruct *const mahrs, const madVector gyro, const madVector accel, const madVector magno, const float deltaT);
 
@@ -166,6 +181,8 @@ class MahrsHPP
         static inline float InverseSquareRoot(const float x);
 
         static inline madVector vectorMultiplyScalar(const madVector vector, const float scalar);
+
+        static inline madVector vectorSubtract(const madVector vectorA, const madVector vectorB);
 
         static inline madQuaternion quaternionAdd(const madQuaternion quaternionA, const madQuaternion quaternionB);
 

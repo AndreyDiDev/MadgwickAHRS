@@ -15,6 +15,21 @@
 // initialisation period in seconds 
 #define INITIALISATION_PERIOD (3.0f)
 
+/**
+ * @brief Cutoff frequency in Hz.
+ */
+#define CORNER_FREQUENCY (0.02f)
+
+/**
+ * @brief Timeout in seconds.
+ */
+#define TIMEOUT (5)
+
+/**
+ * @brief Threshold in degrees per second.
+ */
+#define THRESHOLD (3.0f)
+
 /* Function Declarations ------------------------------------------------------------------*/
 
 // static inline madVector halfGravity(const MahrsStruct *const mahrs);
@@ -80,6 +95,37 @@ void reset(MahrsStruct *const mahrs){
     mahrs->magneticRecoveryTimeout = mahrs->Parameters.recoveryTriggerPeriod;
 }
 
+// offset
+void offsetInitialise(madOffset *const offset, const unsigned int sampleRate){
+    offset->filterCoefficient = 2.0f * (float) M_PI * CORNER_FREQUENCY * (1.0f / (float) sampleRate);
+    offset->timeout = TIMEOUT * sampleRate;
+    offset->timer = 0;
+    offset->gyroscopeOffset = VECTOR_ZERO;
+}
+
+madVector offsetUpdate(madOffset *const offset, madVector gyro){
+        // Subtract offset from gyroscope measurement
+    gyro = vectorSubtract(gyro, offset->gyroscopeOffset);
+
+    // Reset timer if gyroscope not stationary
+    if ((fabsf(gyro.axis.x) > THRESHOLD) || (fabsf(gyro.axis.y) > THRESHOLD) || (fabsf(gyro.axis.z) > THRESHOLD)) {
+        offset->timer = 0;
+        return gyro;
+    }
+
+    // Increment timer while gyroscope stationary
+    if (offset->timer < offset->timeout) {
+        offset->timer++;
+        return gyro;
+    }
+
+    // Adjust offset if timer has elapsed
+    offset->gyroscopeOffset = vectorAdd(offset->gyroscopeOffset, vectorMultiplyScalar(gyro, offset->filterCoefficient));
+
+    return gyro;
+}
+
+//------------------------------------------------
 // with magno
 void Update(MahrsStruct *const mahrs, const madVector gyro, const madVector accel, const madVector magno, const float deltaT) {
     #define Q mahrs->quaternion.element // check if madQ or just quaternion 
@@ -264,8 +310,6 @@ static inline madVector HalfMagnetic(const MahrsStruct *const mahrs){
     #undef Q
 }
 
-// update without magno
-
 // gives half graivty in the NED convention 
 static inline madVector HalfGravity(const MahrsStruct *const mahrs){
     #define q mahrs->quaternion.element
@@ -394,6 +438,21 @@ static inline madVector vectorMultiplyScalar(const madVector vector, const float
     }};
     return product;
 
+}
+
+/**
+ * @brief Returns vector B subtracted from vector A.
+ * @param vectorA Vector A.
+ * @param vectorB Vector B.
+ * @return Vector B subtracted from vector A.
+ */
+static inline madVector vectorSubtract(const madVector vectorA, const madVector vectorB) {
+    const madVector product = {.axis = {
+            .x = vectorA.axis.x - vectorB.axis.x,
+            .y = vectorA.axis.y - vectorB.axis.y,
+            .z = vectorA.axis.z - vectorB.axis.z,
+    }};
+    return product;
 }
 
 static inline madQuaternion quaternionAdd(const madQuaternion quaternionA, const madQuaternion quaternionB){
@@ -525,7 +584,7 @@ madFlags getFlags(const MahrsStruct *const mahrs) {
             .accelRecovery = mahrs->accelRecoveryTrigger > mahrs->accelRecoveryTimeout,
             .magneticRecovery= mahrs->magneticRecoveryTrigger > mahrs->magneticRecoveryTimeout,
     };
-    
+
     return flags;
 }
 
