@@ -129,7 +129,7 @@ typedef struct {
 #endif
 
 
-#define VECTOR_ZERO ((madVector){.array = {0.0f, 0.0f, 0.0f} })
+#define VECTOR_ZERO madVector {.array = {0.0f, 0.0f, 0.0f} }
 #define IDENTITY_QUATERNION ((madQuaternion){.array = {1.0f, 0.0f, 0.0f, 0.0f} })
 /**
  * @brief Identity matrix.
@@ -147,6 +147,8 @@ typedef struct {
 // {
 // 	public:
     // function declarations 
+        static inline madEuler quaternionToEuler(const madQuaternion quaternion);
+
         static inline float degToRads(const float degrees);
 
         // setup functions 
@@ -184,8 +186,6 @@ typedef struct {
 
         static inline int Clamp(const int value, const int min, const int max);
 
-        
-
         static inline float Asin(const float value);
 
         static inline float vectorMagnitudeSquared(const madVector vector);
@@ -200,7 +200,7 @@ typedef struct {
 
         static inline float VectorMagSquared(const madVector vector);
 
-        static inline madVector vectorHadamarProduct(const madVector vectorA, const madVector vectorB);
+        static inline madVector vectorHadamardProduct(const madVector vectorA, const madVector vectorB);
 
         static inline float vectorSum(const madVector vector);
 
@@ -225,6 +225,8 @@ typedef struct {
 
         void setQuaternion(MahrsStruct *const mahrs, const madQuaternion quaternion);
 
+        static inline madVector matrixMultiplyVector(const madMatrix matrix, const madVector vector);
+
         // madVector getLinearAcceleration(const MahrsStruct *const mahrs);
 
         // madVector getEarthAcceleration(const MahrsStruct *const mahrs);
@@ -233,9 +235,34 @@ typedef struct {
 
         static inline madMatrix quaternionToMatrix(const madQuaternion quaternion);
 
-        static inline madEuler quaternionToEuler(const madQuaternion quaternion);
+        
 
         float compassCalculateHeading(const madVector accelerometer, const madVector magnetometer);
+
+        /**
+ * @brief Gyroscope and accelerometer calibration model.
+ * @param uncalibrated Uncalibrated measurement.
+ * @param misalignment Misalignment matrix.
+ * @param sensitivity Sensitivity.
+ * @param offset Offset.
+ * @return Calibrated measurement.
+ */
+static inline madVector calibrationInertial(const madVector uncalibrated, const madMatrix misalignment, const madVector sensitivity, const madVector offset) {
+    return matrixMultiplyVector(misalignment, vectorHadamardProduct(vectorSubtract(uncalibrated, offset), sensitivity));
+}
+
+
+/**
+ * @brief Magnetometer calibration model.
+ * @param uncalibrated Uncalibrated measurement.
+ * @param softIronMatrix Soft-iron matrix.
+ * @param hardIronOffset Hard-iron offset.
+ * @return Calibrated measurement.
+ */
+static inline madVector calibrationMagnetic(const madVector uncalibrated, const madMatrix softIronMatrix, const madVector hardIronOffset) {
+    return matrixMultiplyVector(softIronMatrix, vectorSubtract(uncalibrated, hardIronOffset));
+}
+
 
 	// protected:
 	    // Data
