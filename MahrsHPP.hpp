@@ -126,7 +126,9 @@ typedef struct {
 
     } madEuler;
 
-
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
 
 #define VECTOR_ZERO ((madVector){.array = {0.0f, 0.0f, 0.0f} })
 #define IDENTITY_QUATERNION ((madQuaternion){.array = {1.0f, 0.0f, 0.0f, 0.0f} })
@@ -135,10 +137,11 @@ typedef struct {
 
 
 /* Class ------------------------------------------------------------------*/
-class MahrsHPP
-{
-	public:
+// class MahrsHPP
+// {
+// 	public:
     // function declarations 
+        static inline float degToRads(const float degrees);
 
         // setup functions 
         void mahrsInitialisation(MahrsStruct *const mahrs);
@@ -168,12 +171,14 @@ class MahrsHPP
 
         madVector getEarthAcceleration(const MahrsStruct *const mahrs);
 
+        void setHeading(MahrsStruct *const mahrs, const float heading);
+
         // math 
         static inline madVector vectorSubtract(const madVector vectorA, const madVector vectorB);
 
         static inline int Clamp(const int value, const int min, const int max);
 
-        static inline float degToRads(const float degrees);
+        
 
         static inline float Asin(const float value);
 
@@ -198,6 +203,8 @@ class MahrsHPP
         static inline float InverseSquareRoot(const float x);
 
         static inline madVector vectorMultiplyScalar(const madVector vector, const float scalar);
+
+        static inline madVector vectorAdd(const madVector vectorA, const madVector vectorB);
 
         static inline madQuaternion quaternionAdd(const madQuaternion quaternionA, const madQuaternion quaternionB);
 
@@ -224,12 +231,12 @@ class MahrsHPP
 
         float compassCalculateHeading(const madVector accelerometer, const madVector magnetometer);
 
-	protected:
+	// protected:
 	    // Data
 	    // AccelGyroMagnetismData* data;
 
-	private:
+	// private:
 
-};
+// };
 
 #endif

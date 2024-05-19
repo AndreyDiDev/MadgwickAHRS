@@ -7,8 +7,9 @@
 // #include "MadgwickAHRS\MarhsHPP.hpp"
 // #include "MarhsHPP.hpp"
 #include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\MahrsHPP.hpp"
+// #include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\MahrsHPP::
 
-using MahrsHPP;
+// using namespace MahrsHPP;
 
 /* Definitions ------------------------------------------------------------------*/
 
@@ -533,7 +534,7 @@ static inline madQuaternion quaternionMultiplyVector(const madQuaternion quatern
     #define q quaternion.element
     #define v vector.axis
 
-    const madQuaternion product = {.element{
+    const madQuaternion product = {.element = {
         .w = -q.x * v.x - q.y * v.y - q.z * v.z,
         .x = q.w * v.x + q.y * v.z - q.z * v.y,
         .y = q.w * v.y - q.x * v.z + q.z * v.x,
