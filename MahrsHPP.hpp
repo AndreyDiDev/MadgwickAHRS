@@ -41,24 +41,22 @@ typedef struct{
         }element;
     } madQuaternion;
 
-    typedef union{
-        float array[3][3];
+typedef union{
+    float array[3][3];
 
-        struct{
-            float xx;
-            float xy;
-            float xz;
+    struct{
+        float xx;
+        float xy;
+        float xz;
+        float yx;
+        float yy;
+        float yz;
+        float zx;
+        float zy;
+        float zz;
+    } element;
 
-            float yx;
-            float yy;
-            float yz;
-
-            float zx;
-            float zy;
-            float zz;
-        } element;
-
-    } madMatrix;
+} madMatrix;
 
 typedef struct
 {
@@ -137,6 +135,7 @@ typedef struct {
  * @brief Identity matrix.
  */
 #define IDENTITY_MATRIX ((madMatrix){ .array = {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}} })
+
 
 #define EULER_ZERO ((madEuler){ .array = {0.0f, 0.0f, 0.0f} })
 

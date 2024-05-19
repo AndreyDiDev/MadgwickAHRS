@@ -73,11 +73,11 @@ void setParams(MahrsStruct *const mahrs, const params *const parameters){
 
 void mahrsInitialisation(MahrsStruct *const mahrs){
     params parameters1 = {
-        .algorithmGain = 0.5f,
-        .gyroRange = 0.5f,
-        .accelRejection = 90.0f,
-        .magRejection = 90.0f,
-        .recoveryTriggerPeriod = 0,
+        0.5f,
+        0.5f,
+        90.0f,
+        90.0f,
+        0,
     };
 
     setParams(mahrs, &parameters1);
@@ -630,9 +630,9 @@ static inline madMatrix quaternionToMatrix(const madQuaternion quaternion) {
     const float qxqz = Q.x * Q.z;
     const float qyqz = Q.y * Q.z;
 
-    madMatrix matrix = IDENTITY_MATRIX;
+    // madMatrix matrix = IDENTITY_MATRIX;
 
-    matrix = {.element = {
+    madMatrix matrix = {.element = {
             .xx = 2.0f * (qwqw - 0.5f + Q.x * Q.x),
             .xy = 2.0f * (qxqy - qwqz),
             .xz = 2.0f * (qxqz + qwqy),
@@ -711,7 +711,7 @@ madVector getEarthAcceleration(const MahrsStruct *const mahrs) {
 madFlags getFlags(const MahrsStruct *const mahrs) {
 
     madFlags flags = {
-            .initialization = mahrs->initialisation,
+            .initialization = mahrs->initialisation, //remove the .initialisation
             .angularRateRecovery = mahrs->angularRateRecovery,
             .accelRecovery = mahrs->accelRecoveryTrigger > mahrs->accelRecoveryTimeout,
             .magneticRecovery= mahrs->magneticRecoveryTrigger > mahrs->magneticRecoveryTimeout,
