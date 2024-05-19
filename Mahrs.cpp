@@ -9,6 +9,10 @@
 #include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\MahrsHPP.hpp"
 #include <stdio.h>
 #include <ctime>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <iostream>
 // #include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\MahrsHPP::
 
 // using namespace MahrsHPP;
@@ -759,10 +763,66 @@ float compassCalculateHeading(const madVector accelerometer, const madVector mag
     const madVector north = vectorNormalise(vectorCrossProduct(west, up));
     return radsToDeg(atan2f(west.axis.x, north.axis.x));
 }
+///---------------------------------------------
+// std::vector<std::string> getNextLineAndSplitIntoTokens(std::istream& str) {
+//     std::vector<std::string> result;
+//     std::string line;
+//     std::getline(str, line);
+//     std::stringstream lineStream(line);
+//     std::string cell;
+//     while (std::getline(lineStream, cell, ',')) {
+//         result.push_back(cell);
+//     }
+//     // Check for a trailing comma with no data after it.
+//     if (!lineStream && cell.empty()) {
+//         result.push_back("");
+//     }
+//     return result;
+// }
+
+struct SensorData {
+    double time;
+    double gyroX, gyroY, gyroZ;
+    double accelX, accelY, accelZ;
+    double magX, magY, magZ;
+};
 
 #define SAMPLE_RATE (100) // replace this with actual sample rate
 
 int main() {
+    // set up
+    std::ifstream inputFile("sensor_data.csv");
+    if (!inputFile.is_open()) {
+        std::cerr << "Error opening file." << std::endl;
+        return 1;
+    }
+
+    std::vector<SensorData> sensorData;
+
+    std::string line;
+    while (std::getline(inputFile, line)) {
+        // reads every line 
+        
+        // std::istringstream iss(line);
+        // SensorData data;
+        // char comma;
+        // iss >> data.time >> comma
+        //     >> data.gyroX >> comma
+        //     >> data.gyroY >> comma
+        //     >> data.gyroZ >> comma
+        //     >> data.accelX >> comma
+        //     >> data.accelY >> comma
+        //     >> data.accelZ >> comma
+        //     >> data.magX >> comma
+        //     >> data.magY >> comma
+        //     >> data.magZ;
+        // sensorData.push_back(data);
+    }
+
+    // Now you have sensorData populated with individual data points.
+    // You can access each field like sensorData[i].time, sensorData[i].gyroX, etc.
+
+    inputFile.close();
 
     // Define calibration (replace with actual calibration data if available)
     const madMatrix gyroscopeMisalignment = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
@@ -825,6 +885,9 @@ int main() {
                euler.angle.roll, euler.angle.pitch, euler.angle.yaw,
                earth.axis.x, earth.axis.y, earth.axis.z);
     }
+
+
+    return 0;
 }
 
 
