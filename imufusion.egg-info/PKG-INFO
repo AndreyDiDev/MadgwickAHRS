@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: imufusion
+Version: 1.2.4
+Summary: Fusion Python package
+Home-page: https://github.com/xioTechnologies/Fusion
+Author: x-io Technologies Limited
+Author-email: info@x-io.co.uk
+License: MIT
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Description-Content-Type: text/markdown
+
+See [github](https://github.com/xioTechnologies/Fusion) for documentation and examples.

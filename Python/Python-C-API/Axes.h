@@ -2,7 +2,7 @@
 #define AXES_H
 
 // #include "../../Fusion/Fusion.h"
-#include "Helpers.h"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\Python\Python-C-API\Helpers.h"
 #include <numpy/arrayobject.h>
 #include <Python.h>
 #include <stdlib.h>

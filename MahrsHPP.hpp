@@ -47,6 +47,7 @@ typedef struct
 
 } MahrsStruct;
 
+
 typedef struct{
     float accelError;
     bool accelIgnored;
@@ -209,9 +210,9 @@ class MahrsHPP
 
         void setQuaternion(MahrsStruct *const mahrs, const madQuaternion quaternion);
 
-        madVector getLinearAcceleration(const MahrsStruct *const mahrs);
+        // madVector getLinearAcceleration(const MahrsStruct *const mahrs);
 
-        madVector getEarthAcceleration(const MahrsStruct *const mahrs);
+        // madVector getEarthAcceleration(const MahrsStruct *const mahrs);
 
         madFlags getFlags(const MahrsStruct *const mahrs);
 

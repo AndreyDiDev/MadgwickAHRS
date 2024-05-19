@@ -2,9 +2,10 @@
 #define FLAGS_H
 
 // #include "../../Fusion/Fusion.h"
-#include "Helpers.h"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\Python\Python-C-API\Helpers.h"
 #include <Python.h>
-#include "../AHRSRepo/MadgwickAHRS/MarhsHPP.hpp"
+// #include "../AHRSRepo/MadgwickAHRS/MarhsHPP.hpp"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\MahrsHPP.hpp"
 
 typedef struct {
     PyObject_HEAD

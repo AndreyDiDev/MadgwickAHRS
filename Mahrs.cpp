@@ -5,7 +5,8 @@
 #include <math.h>
 #include <float.h> 
 // #include "MadgwickAHRS\MarhsHPP.hpp"
-#include "MarhsHPP.hpp"
+// #include "MarhsHPP.hpp"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\MahrsHPP.hpp"
 
 /* Definitions ------------------------------------------------------------------*/
 
@@ -45,7 +46,7 @@
 
 // initialise 
 void mahrsInitialisation(MahrsStruct *const mahrs){
-    const params parameters = {
+    const params parameters1 = {
         .algorithmGain = 0.5f,
         .gyroRange = 0.5f,
         .accelRejection = 90.0f,
@@ -53,7 +54,7 @@ void mahrsInitialisation(MahrsStruct *const mahrs){
         .recoveryTriggerPeriod = 0,
     };
 
-    setParams(mahrs, &parameters);
+    setParams(mahrs, &parameters1);
     madReset(mahrs);
 }
 
@@ -621,21 +622,21 @@ static inline madEuler quaternionToEuler(const madQuaternion quaternion) {
 #undef Q
 }
 
-madVector getLinearAcceleration(const MahrsStruct *const mahrs) {
-#define Q mahrs->quaternion.element
+// madVector getLinearAcceleration(const MahrsStruct *const mahrs) {
+// #define Q mahrs->quaternion.element
 
-    // Calculate gravity in the sensor coordinate frame, using NED convention 
-    const madVector gravity = {.axis = {
-            .x = 2.0f * (Q.x * Q.z - Q.w * Q.y),
-            .y = 2.0f * (Q.y * Q.z + Q.w * Q.x),
-            .z = 2.0f * (Q.w * Q.w - 0.5f + Q.z * Q.z),
-    }}; // third column of transposed rotation matrix
+//     // Calculate gravity in the sensor coordinate frame, using NED convention 
+//     const madVector gravity = {.axis = {
+//             .x = 2.0f * (Q.x * Q.z - Q.w * Q.y),
+//             .y = 2.0f * (Q.y * Q.z + Q.w * Q.x),
+//             .z = 2.0f * (Q.w * Q.w - 0.5f + Q.z * Q.z),
+//     }}; // third column of transposed rotation matrix
 
-    // Remove gravity from accelerometer measurement
-    return vectorAdd(mahrs->accel, gravity);
+//     // Remove gravity from accelerometer measurement
+//     return vectorAdd(mahrs->accel, gravity);
 
-#undef Q
-}
+// #undef Q
+// }
 
 madVector getEarthAcceleration(const MahrsStruct *const mahrs) {
     #define Q mahrs->quaternion.element

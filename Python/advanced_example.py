@@ -1,7 +1,18 @@
+
+# print(PYTHON_INCLUDE_PATH)
+
+# import sys 
+# help('modules')
+# print(sys.path)
+import sys
+# sys.path.append('''C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/Python''')
+
 import imufusion
 import matplotlib.pyplot as pyplot
 import numpy
-import sys
+
+
+
 
 # Import sensor data
 data = numpy.genfromtxt("C:/Users/Andrey/Documents/Fusion-main/Fusion-main/Python/sensor_data.csv", delimiter=",", skip_header=1)
@@ -19,7 +30,8 @@ ahrs = imufusion.Ahrs()
 
 
 
-ahrs.settings = imufusion.Settings(imufusion.0.5,  # gain
+ahrs.settings = imufusion.Settings(imufusion.CONVENTION_NED,
+                                   0.5,  # gain
                                    2000,  # gyroscope range
                                    10,  # acceleration rejection
                                    10,  # magnetic rejection

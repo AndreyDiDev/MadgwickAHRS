@@ -1,14 +1,15 @@
-// #include "Ahrs.h"
-// #include "Axes.h"
-// #include "Compass.h"
-// #include "Flags.h"
-// #include "InternalStates.h"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\Python\Python-C-API\Ahrs.h"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\Python\Python-C-API\Axes.h"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\Python\Python-C-API\Compass.h"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\Python\Python-C-API\Flags.h"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\Python\Python-C-API\InternalStates.h"
 #include <numpy/arrayobject.h>
-// #include "Offset.h"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\Python\Python-C-API\Offset.h"
 #include <Python.h>
-// #include "Quaternion.h"
-// #include "Settings.h"
-#include "../AHRSRepo/MadgwickAHRS/MarhsHPP.hpp"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\Python\Python-C-API\Quaternion.h"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\Python\Python-C-API\Settings.h"
+// #include "../AHRSRepo/MadgwickAHRS/MarhsHPP.hpp"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\MahrsHPP.hpp"
 
 static struct PyModuleDef config = {
         PyModuleDef_HEAD_INIT,
