@@ -8,6 +8,8 @@
 // #include "MarhsHPP.hpp"
 #include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\MahrsHPP.hpp"
 
+using MahrsHPP;
+
 /* Definitions ------------------------------------------------------------------*/
 
 // initial gain during initialisation 
@@ -45,18 +47,7 @@
 /* Functions ------------------------------------------------------------------*/
 
 // initialise 
-void mahrsInitialisation(MahrsStruct *const mahrs){
-    const params parameters1 = {
-        .algorithmGain = 0.5f,
-        .gyroRange = 0.5f,
-        .accelRejection = 90.0f,
-        .magRejection = 90.0f,
-        .recoveryTriggerPeriod = 0,
-    };
 
-    setParams(mahrs, &parameters1);
-    madReset(mahrs);
-}
 
 void setParams(MahrsStruct *const mahrs, const params *const parameters){
     mahrs->Parameters.algorithmGain = parameters->algorithmGain;
@@ -77,6 +68,19 @@ void setParams(MahrsStruct *const mahrs, const params *const parameters){
     };
 
     mahrs->rampedGainStep=(INITIAL_GAIN - mahrs->Parameters.algorithmGain)/INITIALISATION_PERIOD;
+}
+
+void mahrsInitialisation(MahrsStruct *const mahrs){
+    const params parameters1 = {
+        .algorithmGain = 0.5f,
+        .gyroRange = 0.5f,
+        .accelRejection = 90.0f,
+        .magRejection = 90.0f,
+        .recoveryTriggerPeriod = 0,
+    };
+
+    setParams(mahrs, &parameters1);
+    madReset(mahrs);
 }
 
 // resets the ahrs 

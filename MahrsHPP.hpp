@@ -19,6 +19,47 @@ typedef struct{
     unsigned int recoveryTriggerPeriod;
 } params;
 
+    typedef union {
+        float array[3];
+
+        struct {
+            float x;
+            float y;
+            float z;
+        } axis;
+
+    } madVector;
+
+    typedef union {
+        float array[4];
+
+        struct{
+            float w;
+            float x;
+            float y;
+            float z;
+        }element;
+    } madQuaternion;
+
+    typedef union{
+        float array[3][3];
+
+        struct{
+            float xx;
+            float xy;
+            float xz;
+
+            float yx;
+            float yy;
+            float yz;
+
+            float zx;
+            float zy;
+            float zz;
+        } element;
+
+    } madMatrix;
+
 typedef struct
 {
     params Parameters;
@@ -82,48 +123,10 @@ typedef struct {
             float pitch;
             float yaw;
         } angle;
+
     } madEuler;
 
-    typedef union {
-        float array[3];
 
-        struct {
-            float x;
-            float y;
-            float z;
-        } axis;
-
-    } madVector;
-
-    typedef union {
-        float array[4];
-
-        struct{
-            float w;
-            float x;
-            float y;
-            float z;
-        }element;
-    } madQuaternion;
-
-    typedef union{
-        float array[3][3];
-
-        struct{
-            float xx;
-            float xy;
-            float xz;
-
-            float yx;
-            float yy;
-            float yz;
-
-            float zx;
-            float zy;
-            float zz;
-        } element;
-
-    } madMatrix;
 
 #define VECTOR_ZERO ((madVector){.array = {0.0f, 0.0f, 0.0f} })
 #define IDENTITY_QUATERNION ((madQuaternion){.array = {1.0f, 0.0f, 0.0f, 0.0f} })
@@ -166,6 +169,7 @@ class MahrsHPP
         madVector getEarthAcceleration(const MahrsStruct *const mahrs);
 
         // math 
+        static inline madVector vectorSubtract(const madVector vectorA, const madVector vectorB);
 
         static inline int Clamp(const int value, const int min, const int max);
 
@@ -194,8 +198,6 @@ class MahrsHPP
         static inline float InverseSquareRoot(const float x);
 
         static inline madVector vectorMultiplyScalar(const madVector vector, const float scalar);
-
-        static inline madVector vectorSubtract(const madVector vectorA, const madVector vectorB);
 
         static inline madQuaternion quaternionAdd(const madQuaternion quaternionA, const madQuaternion quaternionB);
 
