@@ -130,8 +130,15 @@ typedef struct {
 #define M_PI (3.14159265358979323846)
 #endif
 
+
 #define VECTOR_ZERO ((madVector){.array = {0.0f, 0.0f, 0.0f} })
 #define IDENTITY_QUATERNION ((madQuaternion){.array = {1.0f, 0.0f, 0.0f, 0.0f} })
+/**
+ * @brief Identity matrix.
+ */
+#define IDENTITY_MATRIX ((madMatrix){ .array = {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}} })
+
+#define EULER_ZERO ((madEuler){ .array = {0.0f, 0.0f, 0.0f} })
 
 /* Macros/Enums ------------------------------------------------------------*/
 

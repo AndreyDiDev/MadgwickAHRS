@@ -72,7 +72,7 @@ void setParams(MahrsStruct *const mahrs, const params *const parameters){
 }
 
 void mahrsInitialisation(MahrsStruct *const mahrs){
-    const params parameters1 = {
+    params parameters1 = {
         .algorithmGain = 0.5f,
         .gyroRange = 0.5f,
         .accelRejection = 90.0f,
@@ -261,10 +261,12 @@ void updateExternalHeading(MahrsStruct *const mahrs, const madVector gyro, const
     // calculate roll
     const float roll = atan2f(q.w * q.x + q.y * q.z, 0.5f -q.y * q.y - q.x * q.x);
 
+    madVector magno = VECTOR_ZERO;
+
     // calculate magnetometer
     const float headingRads = degToRads(heading);
     const float sinHeadingRads = sinf(headingRads);
-    const madVector magno = {.axis = {
+    magno = {.axis = {
         .x = cosf(headingRads),
         .y = -1.0f * cosf(roll) * sinHeadingRads,
         .z = sinHeadingRads * sinf(roll),
@@ -279,9 +281,11 @@ void updateExternalHeading(MahrsStruct *const mahrs, const madVector gyro, const
 void setHeading(MahrsStruct *const mahrs, const float heading){
     #define q mahrs->quaternion.element
 
+    madQuaternion rotation = IDENTITY_QUATERNION;
+
     const float yaw = atan2f(q.w * q.z + q.x * q.y, 0.5f - q.y * q.y - q.z * q.z);
     const float halfYawMinusHeading = 0.5f * (yaw - degToRads(heading));
-    const madQuaternion rotation = {.element = {
+    rotation = {.element = {
         .w = cosf(halfYawMinusHeading),
         .x = 0.0f,
         .y = 0.0f,
@@ -303,8 +307,10 @@ static inline madVector Feedback(const madVector sensor, const madVector referen
 static inline madVector HalfMagnetic(const MahrsStruct *const mahrs){
     #define Q mahrs->quaternion.element
 
+    madVector halfMagnetic = VECTOR_ZERO;
+
     // second col of transposed rotation matrix scaled by -0.5
-    const madVector halfMagnetic = {.axis = {
+    halfMagnetic = {.axis = {
         .x = -1.0f * (Q.x * Q.y + Q.w * Q.z),
         .y = 0.5f - Q.w * Q.w - Q.y * Q.y,
         .z = Q.w * Q.x - Q.y * Q.z,
@@ -316,12 +322,13 @@ static inline madVector HalfMagnetic(const MahrsStruct *const mahrs){
     #undef Q
 }
 
-// gives half graivty in the NED convention 
+// gives half gravity in the NED convention 
 static inline madVector HalfGravity(const MahrsStruct *const mahrs){
     #define q mahrs->quaternion.element
 
+    madVector halfGravity = VECTOR_ZERO;
     // third col scaled by -0.5
-    const madVector halfGravity = {.axis ={
+    halfGravity = {.axis ={
         .x = q.x * q.z - q.w * q.y,
         .y = q.y * q.z + q.w * q.x,
         .z = q.w * q.w - 0.5f + q.z * q.z,
@@ -334,8 +341,9 @@ static inline madVector HalfGravity(const MahrsStruct *const mahrs){
 madVector getLinearAcceleration(const MahrsStruct *const mahrs){
     #define q mahrs->quaternion.element
 
+    madVector gravityVector = VECTOR_ZERO;
     // calc gravity from the sensor's coordinate system
-    const madVector gravityVector = {.axis ={
+    gravityVector = {.axis ={
         .x = 2.0f * (q.x * q.z - q.w * q.y),
         .y = 2.0f * (q.y * q.z + q.w * q.x),
         .z = 2.0f * (q.w * q.w - 0.5f + q.z * q.z),
@@ -404,7 +412,9 @@ static inline madVector vectorAdd(const madVector vectorA, const madVector vecto
     #define A vectorA.axis
     #define B vectorB.axis
 
-    const madVector product = {.axis={
+    madVector product = VECTOR_ZERO;
+
+    product = {.axis={
         .x = A.x + B.x,
         .y = A.y + B.y,
         .z = A.z + B.z,
@@ -416,10 +426,12 @@ static inline madVector vectorAdd(const madVector vectorA, const madVector vecto
 }
 
 static inline madVector vectorCrossProduct(const madVector vectorA, const madVector vectorB){
-#define A vectorA.axis
-#define B vectorB.axis
+    #define A vectorA.axis
+    #define B vectorB.axis
 
-    const madVector product = {.axis = {
+    madVector product = VECTOR_ZERO;
+
+    product = {.axis = {
         .x = A.y * B.z - A.z * B.y,
         .y = A.z * B.x - A.x * B.z,
         .z = A.x * B.y - A.y * B.x,
@@ -448,7 +460,9 @@ static inline float VectorMagSquared(const madVector vector){
 }
 
 static inline madVector vectorHadamarProduct(const madVector vectorA, const madVector vectorB){
-    const madVector product = {.axis = {
+    madVector product = VECTOR_ZERO;
+
+    product = {.axis = {
         .x = vectorA.axis.x * vectorB.axis.x,
         .y = vectorA.axis.y * vectorB.axis.y,
         .z = vectorA.axis.z * vectorB.axis.z,
@@ -461,10 +475,12 @@ static inline float vectorSum(const madVector vector){
 }
 
 static inline madVector vectorNormalise(const madVector vector){
+    float magReciprocal = 0.0f;
+
     #ifdef NORMAL_SQRT
-        const float magReciprocal = 1.0f / sqrtf(VectorMagSquared(vector));
+        magReciprocal = 1.0f / sqrtf(VectorMagSquared(vector));
     #else  
-        const float magReciprocal = InverseSquareRoot(VectorMagSquared(vector));
+        magReciprocal = InverseSquareRoot(VectorMagSquared(vector));
     #endif
         return vectorMultiplyScalar(vector, magReciprocal);
 }
@@ -489,7 +505,9 @@ static inline float InverseSquareRoot(const float x){
  * Multiplies vector by given scalar 
 */
 static inline madVector vectorMultiplyScalar(const madVector vector, const float scalar){
-    const madVector product = {.axis = {
+    madVector product = VECTOR_ZERO;
+
+    product = {.axis = {
         .x = vector.axis.x * scalar,
         .y = vector.axis.y * scalar,
         .z = vector.axis.z * scalar,
@@ -505,7 +523,9 @@ static inline madVector vectorMultiplyScalar(const madVector vector, const float
  * @return Vector B subtracted from vector A.
  */
 static inline madVector vectorSubtract(const madVector vectorA, const madVector vectorB) {
-    const madVector product = {.axis = {
+    madVector product = VECTOR_ZERO;
+
+    product = {.axis = {
             .x = vectorA.axis.x - vectorB.axis.x,
             .y = vectorA.axis.y - vectorB.axis.y,
             .z = vectorA.axis.z - vectorB.axis.z,
@@ -517,7 +537,9 @@ static inline madQuaternion quaternionAdd(const madQuaternion quaternionA, const
     #define A quaternionA.element
     #define B quaternionB.element
 
-    const madQuaternion product = {.element ={
+    madQuaternion product = IDENTITY_QUATERNION;
+
+    product = {.element ={
         .w = A.w + B.w,
         .x = A.x + B.x,
         .y = A.y + B.y,
@@ -534,7 +556,9 @@ static inline madQuaternion quaternionMultiplyVector(const madQuaternion quatern
     #define q quaternion.element
     #define v vector.axis
 
-    const madQuaternion product = {.element = {
+    madQuaternion product = IDENTITY_QUATERNION;
+
+    product = {.element = {
         .w = -q.x * v.x - q.y * v.y - q.z * v.z,
         .x = q.w * v.x + q.y * v.z - q.z * v.y,
         .y = q.w * v.y - q.x * v.z + q.z * v.x,
@@ -554,12 +578,15 @@ static inline madQuaternion quaternionNormalise(const madQuaternion quaternion){
     #else
         const float magReciprocal = InverseSquareRoot(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
     #endif 
-        const madQuaternion product = {.element = {
-            .w = q.w * magReciprocal,
-            .x = q.x * magReciprocal,
-            .y = q.y * magReciprocal,
-            .z = q.z * magReciprocal,
-        }};
+
+    madQuaternion product = IDENTITY_QUATERNION;
+
+    product = {.element = {
+        .w = q.w * magReciprocal,
+        .x = q.x * magReciprocal,
+        .y = q.y * magReciprocal,
+        .z = q.z * magReciprocal,
+    }};
 
     return product;
 
@@ -567,16 +594,18 @@ static inline madQuaternion quaternionNormalise(const madQuaternion quaternion){
 }
 
 static inline madQuaternion quaternionMultiply(const madQuaternion quaternionA, const madQuaternion quaternionB) {
-#define A quaternionA.element
-#define B quaternionB.element
+    #define A quaternionA.element
+    #define B quaternionB.element
 
-    const madQuaternion result = {.element = {
+    madQuaternion product = IDENTITY_QUATERNION;
+
+    product = {.element = {
             .w = A.w * B.w - A.x * B.x - A.y * B.y - A.z * B.z,
             .x = A.w * B.x + A.x * B.w + A.y * B.z - A.z * B.y,
             .y = A.w * B.y - A.x * B.z + A.y * B.w + A.z * B.x,
             .z = A.w * B.z + A.x * B.y - A.y * B.x + A.z * B.w,
     }};
-    return result;
+    return product;
 
 #undef A
 #undef B
@@ -600,7 +629,10 @@ static inline madMatrix quaternionToMatrix(const madQuaternion quaternion) {
     const float qxqy = Q.x * Q.y;
     const float qxqz = Q.x * Q.z;
     const float qyqz = Q.y * Q.z;
-    const madMatrix matrix = {.element = {
+
+    madMatrix matrix = IDENTITY_MATRIX;
+
+    matrix = {.element = {
             .xx = 2.0f * (qwqw - 0.5f + Q.x * Q.x),
             .xy = 2.0f * (qxqy - qwqz),
             .xz = 2.0f * (qxqz + qwqy),
@@ -618,7 +650,10 @@ static inline madMatrix quaternionToMatrix(const madQuaternion quaternion) {
 static inline madEuler quaternionToEuler(const madQuaternion quaternion) {
 #define Q quaternion.element
     const float halfMinusQySquared = 0.5f - Q.y * Q.y; // calculate common terms to avoid repeated operations
-    const madEuler euler = {.angle = {
+
+    madEuler euler = EULER_ZERO;
+
+    euler = {.angle = {
             .roll = radsToDeg(atan2f(Q.w * Q.x + Q.y * Q.z, halfMinusQySquared - Q.x * Q.x)),
             .pitch = radsToDeg(Asin(2.0f * (Q.w * Q.y - Q.z * Q.x))),
             .yaw = radsToDeg(atan2f(Q.w * Q.z + Q.x * Q.y, halfMinusQySquared - Q.z * Q.z)),
@@ -656,7 +691,9 @@ madVector getEarthAcceleration(const MahrsStruct *const mahrs) {
     const float qxqz = Q.x * Q.z;
     const float qyqz = Q.y * Q.z;
 
-    madVector accelerometerVector = {.axis = {
+    madVector accelerometerVector = VECTOR_ZERO;
+
+    accelerometerVector = {.axis = {
             .x = 2.0f * ((qwqw - 0.5f + Q.x * Q.x) * A.x + (qxqy - qwqz) * A.y + (qxqz + qwqy) * A.z),
             .y = 2.0f * ((qxqy + qwqz) * A.x + (qwqw - 0.5f + Q.y * Q.y) * A.y + (qyqz - qwqx) * A.z),
             .z = 2.0f * ((qxqz - qwqy) * A.x + (qyqz + qwqx) * A.y + (qwqw - 0.5f + Q.z * Q.z) * A.z),
@@ -672,7 +709,8 @@ madVector getEarthAcceleration(const MahrsStruct *const mahrs) {
 }
 
 madFlags getFlags(const MahrsStruct *const mahrs) {
-    const madFlags flags = {
+
+    madFlags flags = {
             .initialization = mahrs->initialisation,
             .angularRateRecovery = mahrs->angularRateRecovery,
             .accelRecovery = mahrs->accelRecoveryTrigger > mahrs->accelRecoveryTimeout,
@@ -683,7 +721,7 @@ madFlags getFlags(const MahrsStruct *const mahrs) {
 }
 
 madInternalStates getInternalStates(const MahrsStruct *const mahrs){
-    const madInternalStates internalStates = {
+    madInternalStates internalStates = {
             .accelError = radsToDeg(Asin(2.0f * vectorMagnitude(mahrs->halfAccelFeedback))),
             .accelIgnored = mahrs->accelIgnored,
             .accelRecoveryTrigger = mahrs->Parameters.recoveryTriggerPeriod == 0 ? 0.0f : (float) mahrs->accelRecoveryTrigger / (float) mahrs->Parameters.recoveryTriggerPeriod,
