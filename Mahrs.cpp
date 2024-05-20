@@ -791,7 +791,8 @@ void test(madMatrix gyroscopeMisalignment,
     madVector hardIronOffset, 
     madOffset offset, 
     MahrsStruct ahrs,
-    SensorData data){
+    SensorData data,
+    std::ofstream &outputFile){
     // Acquire latest sensor data
         const float timestamp = data.time; // replace this with actual gyroscope timestamp
         std::cout << data.time << std::endl;
@@ -824,6 +825,23 @@ void test(madMatrix gyroscopeMisalignment,
         printf("Roll %0.2f, Pitch %0.2f, Yaw %0.2f, X %0.2f, Y %0.2f, Z %0.2f\n",
                euler.angle.roll, euler.angle.pitch, euler.angle.yaw,
                earth.axis.x, earth.axis.y, earth.axis.z);
+
+        // update file
+        // outputFile << euler.angle.roll, euler.angle.pitch, euler.angle.yaw;
+        // outputFile << "\n";
+        // sizeof(euler.angle.roll) + sizeof(euler.angle.roll) + sizeof(euler.angle.roll)
+        // unsigned int size = sizeof(euler.angle.roll) + sizeof(euler.angle.pitch) + sizeof(euler.angle.yaw);
+
+        // char buffer[ size ];
+        // snprintf( buffer, sizeof( buffer ),
+        // "[%ic],[%ic],[%ic]\n",
+        // euler.angle.roll, euler.angle.pitch, euler.angle.yaw);
+
+        // Write to file in the desired format
+        outputFile << timestamp << "," << euler.angle.roll << "," << euler.angle.pitch << "," << euler.angle.yaw << std::endl;
+
+        // outputFile << buffer;   
+
 }
 
 
@@ -841,21 +859,15 @@ int main() {
         return 1;
     }
 
-    // std::vector<SensorData> sensorData;
     std::string token;
-
     SensorData sensorData;
-    
-
     std::vector<std::vector<float>> listOfVectors;
-
     std::string line;
     std::getline(inputFile, line); // remove header
 
     while (std::getline(inputFile, line)) {
         std::istringstream iss(line);
         std::vector<float> values;
-        // std::cerr << line << std::endl;
         // reads every line 
         while (std::getline(iss, token, ',')) {
             try {
@@ -869,10 +881,7 @@ int main() {
         }
         listOfVectors.push_back(values);
     }
-
     // Now you have sensorData populated with individual data points.
-    // You can access each field like sensorData[i].time, sensorData[i].gyroX, etc.
-
     inputFile.close();
 
     // Define calibration (replace with actual calibration data if available)
@@ -903,11 +912,8 @@ int main() {
     };
     setParams(&ahrs, &settings);
 
-    // This loop should repeat each time new gyroscope data is available
-    // while (true) {
-
-        
-    // }
+    std::ofstream outputFile;
+    outputFile.open("outputFile.txt");
 
     // Print the contents of each vector in the list
     for (const auto& vec : listOfVectors) {
@@ -933,8 +939,10 @@ int main() {
         // printf("%.6f, %.10f, %f\n", sensorData.time, sensorData.gyroX, sensorData.gyroY);
         test(gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset, 
         accelerometerMisalignment,accelerometerSensitivity,accelerometerOffset,
-        softIronMatrix, hardIronOffset, offset, ahrs, sensorData);
+        softIronMatrix, hardIronOffset, offset, ahrs, sensorData, outputFile);
     }
+
+    outputFile.close();
 
     return 0;
 }
