@@ -803,13 +803,16 @@ int main() {
 
     std::vector<SensorData> sensorData;
     std::string token;
-    std::vector<double> values;
+    
+
+    std::vector<std::vector<double>> listOfVectors;
 
     std::string line;
     std::getline(inputFile, line); // remove header
 
     while (std::getline(inputFile, line)) {
         std::istringstream iss(line);
+        std::vector<double> values;
         // std::cerr << line << std::endl;
         // reads every line 
         while (std::getline(iss, token, ',')) {
@@ -822,12 +825,17 @@ int main() {
                 std::cerr << "Error parsing token: " << token << std::endl;
             }
         }
+        listOfVectors.push_back(values);
+    }
 
-        for (const auto& value : values) {
+    // Print the contents of each vector in the list
+    for (const auto& vec : listOfVectors) {
+        for (const auto& value : vec) {
             std::cout << value << ", ";
         }
         std::cout << std::endl;
     }
+    std::cout << std::endl;
 
     // Now you have sensorData populated with individual data points.
     // You can access each field like sensorData[i].time, sensorData[i].gyroX, etc.
