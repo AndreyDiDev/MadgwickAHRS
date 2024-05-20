@@ -19,6 +19,13 @@ typedef struct{
     unsigned int recoveryTriggerPeriod;
 } params;
 
+typedef struct {
+    float time;
+    float gyroX, gyroY, gyroZ;
+    float accelX, accelY, accelZ;
+    float magX, magY, magZ;
+}SensorData;
+
     typedef union {
         float array[3];
 

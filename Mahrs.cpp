@@ -781,12 +781,49 @@ float compassCalculateHeading(const madVector accelerometer, const madVector mag
 //     return result;
 // }
 
-struct SensorData {
-    double time;
-    double gyroX, gyroY, gyroZ;
-    double accelX, accelY, accelZ;
-    double magX, magY, magZ;
-};
+void test(madMatrix gyroscopeMisalignment,
+    madVector gyroscopeSensitivity,
+    madVector gyroscopeOffset,
+    madMatrix accelerometerMisalignment,
+    madVector accelerometerSensitivity,
+    madVector accelerometerOffset,
+    madMatrix softIronMatrix,
+    madVector hardIronOffset, 
+    madOffset offset, 
+    MahrsStruct ahrs,
+    SensorData data){
+    // Acquire latest sensor data
+        const clock_t timestamp = data.time; // replace this with actual gyroscope timestamp
+        madVector gyroscope = {data.gyroX, data.gyroY, data.gyroZ}; // replace this with actual gyroscope data in degrees/s
+        madVector accelerometer = {data.accelX, data.accelY, data.accelZ}; // replace this with actual accelerometer data in g
+        madVector magnetometer = {data.magX, data.magY, data.magZ}; // replace this with actual magnetometer data in arbitrary units
+
+        // Apply calibration
+        gyroscope = calibrationInertial(gyroscope, gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset);
+        accelerometer = calibrationInertial(accelerometer, accelerometerMisalignment, accelerometerSensitivity, accelerometerOffset);
+        magnetometer = calibrationMagnetic(magnetometer, softIronMatrix, hardIronOffset);
+
+        // Update gyroscope offset correction algorithm
+        gyroscope = offsetUpdate(&offset, gyroscope);
+
+        // Calculate delta time (in seconds) to account for gyroscope sample clock error
+        static clock_t previousTimestamp;
+        const float deltaTime = (float) (timestamp - previousTimestamp) / (float) CLOCKS_PER_SEC;
+        previousTimestamp = timestamp;
+
+        // Update gyroscope AHRS algorithm
+        Update(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
+
+        // Print algorithm outputs
+        const madEuler euler = quaternionToEuler(getQuaternion(&ahrs));
+        const madVector earth = getEarthAcceleration(&ahrs);
+
+        printf("Roll %0.1f, Pitch %0.1f, Yaw %0.1f, X %0.1f, Y %0.1f, Z %0.1f\n",
+               euler.angle.roll, euler.angle.pitch, euler.angle.yaw,
+               earth.axis.x, earth.axis.y, earth.axis.z);
+}
+
+
 
 // sensorData(double inTime, 
 // double ingyroX, double ingyroY, double ingyroZ,double inaccelX, double inaccelY, double inaccelZ, double inmagX, double inmagY, double inmagZ) : time{inTime}, gyroX{ingyroX}, gyroY{ingyroY}, gyroZ{ingyroZ}, accelX{inaccelX}, accelY{inaccelY}, accelZ{inaccelZ}, magX{inmagX}, magY{inmagY}, magZ{inmagZ} {};
@@ -801,18 +838,20 @@ int main() {
         return 1;
     }
 
-    std::vector<SensorData> sensorData;
+    // std::vector<SensorData> sensorData;
     std::string token;
+
+    SensorData sensorData;
     
 
-    std::vector<std::vector<double>> listOfVectors;
+    std::vector<std::vector<float>> listOfVectors;
 
     std::string line;
     std::getline(inputFile, line); // remove header
 
     while (std::getline(inputFile, line)) {
         std::istringstream iss(line);
-        std::vector<double> values;
+        std::vector<float> values;
         // std::cerr << line << std::endl;
         // reads every line 
         while (std::getline(iss, token, ',')) {
@@ -827,15 +866,6 @@ int main() {
         }
         listOfVectors.push_back(values);
     }
-
-    // Print the contents of each vector in the list
-    for (const auto& vec : listOfVectors) {
-        for (const auto& value : vec) {
-            std::cout << value << ", ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << std::endl;
 
     // Now you have sensorData populated with individual data points.
     // You can access each field like sensorData[i].time, sensorData[i].gyroX, etc.
@@ -871,42 +901,42 @@ int main() {
     setParams(&ahrs, &settings);
 
     // This loop should repeat each time new gyroscope data is available
-    while (true) {
+    // while (true) {
 
-        // Acquire latest sensor data
-        const clock_t timestamp = clock(); // replace this with actual gyroscope timestamp
-        madVector gyroscope = {0.0f, 0.0f, 0.0f}; // replace this with actual gyroscope data in degrees/s
-        madVector accelerometer = {0.0f, 0.0f, 1.0f}; // replace this with actual accelerometer data in g
-        madVector magnetometer = {1.0f, 0.0f, 0.0f}; // replace this with actual magnetometer data in arbitrary units
+        
+    // }
 
-        // Apply calibration
-        gyroscope = calibrationInertial(gyroscope, gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset);
-        accelerometer = calibrationInertial(accelerometer, accelerometerMisalignment, accelerometerSensitivity, accelerometerOffset);
-        magnetometer = calibrationMagnetic(magnetometer, softIronMatrix, hardIronOffset);
+    // Print the contents of each vector in the list
+    for (const auto& vec : listOfVectors) {
+        // for (const auto& value : vec) {
+        //     std::cout << value << ", ";
+        // }
+        // std::cout << std::endl;
+        // sensorData. = 1.4f;
 
-        // Update gyroscope offset correction algorithm
-        gyroscope = offsetUpdate(&offset, gyroscope);
+        sensorData = {
+            vec[0],
+            vec[1],
+            vec[2],
+            vec[3],
+            vec[4],
+            vec[5],
+            vec[6],
+            vec[7],
+            vec[8],
+            vec[9],
+        };
 
-        // Calculate delta time (in seconds) to account for gyroscope sample clock error
-        static clock_t previousTimestamp;
-        const float deltaTime = (float) (timestamp - previousTimestamp) / (float) CLOCKS_PER_SEC;
-        previousTimestamp = timestamp;
-
-        // Update gyroscope AHRS algorithm
-        Update(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
-
-        // Print algorithm outputs
-        const madEuler euler = quaternionToEuler(getQuaternion(&ahrs));
-        const madVector earth = getEarthAcceleration(&ahrs);
-
-        // printf("Roll %0.1f, Pitch %0.1f, Yaw %0.1f, X %0.1f, Y %0.1f, Z %0.1f\n",
-        //        euler.angle.roll, euler.angle.pitch, euler.angle.yaw,
-        //        earth.axis.x, earth.axis.y, earth.axis.z);
+        // printf("%.6f, %.10f, %f\n", sensorData.time, sensorData.gyroX, sensorData.gyroY);
+        test(gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset, 
+        accelerometerMisalignment,accelerometerSensitivity,accelerometerOffset,
+        softIronMatrix, hardIronOffset, offset, ahrs, sensorData);
     }
-
 
     return 0;
 }
+
+
 
 
 
