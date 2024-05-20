@@ -26,16 +26,16 @@ typedef struct {
     float magX, magY, magZ;
 }SensorData;
 
-    typedef union {
-        float array[3];
+typedef union {
+    float array[3];
 
-        struct {
-            float x;
-            float y;
-            float z;
-        } axis;
+    struct {
+        float x;
+        float y;
+        float z;
+    } axis;
 
-    } madVector;
+} madVector;
 
     typedef union {
         float array[4];

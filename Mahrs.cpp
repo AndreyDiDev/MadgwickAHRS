@@ -793,7 +793,8 @@ void test(madMatrix gyroscopeMisalignment,
     MahrsStruct ahrs,
     SensorData data){
     // Acquire latest sensor data
-        const clock_t timestamp = data.time; // replace this with actual gyroscope timestamp
+        const float timestamp = data.time; // replace this with actual gyroscope timestamp
+        std::cout << data.time << std::endl;
         madVector gyroscope = {data.gyroX, data.gyroY, data.gyroZ}; // replace this with actual gyroscope data in degrees/s
         madVector accelerometer = {data.accelX, data.accelY, data.accelZ}; // replace this with actual accelerometer data in g
         madVector magnetometer = {data.magX, data.magY, data.magZ}; // replace this with actual magnetometer data in arbitrary units
@@ -807,9 +808,11 @@ void test(madMatrix gyroscopeMisalignment,
         gyroscope = offsetUpdate(&offset, gyroscope);
 
         // Calculate delta time (in seconds) to account for gyroscope sample clock error
-        static clock_t previousTimestamp;
+        float previousTimestamp;
         const float deltaTime = (float) (timestamp - previousTimestamp) / (float) CLOCKS_PER_SEC;
         previousTimestamp = timestamp;
+
+        std::cout << deltaTime << std::endl;
 
         // Update gyroscope AHRS algorithm
         Update(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
@@ -818,7 +821,7 @@ void test(madMatrix gyroscopeMisalignment,
         const madEuler euler = quaternionToEuler(getQuaternion(&ahrs));
         const madVector earth = getEarthAcceleration(&ahrs);
 
-        printf("Roll %0.1f, Pitch %0.1f, Yaw %0.1f, X %0.1f, Y %0.1f, Z %0.1f\n",
+        printf("Roll %0.2f, Pitch %0.2f, Yaw %0.2f, X %0.2f, Y %0.2f, Z %0.2f\n",
                euler.angle.roll, euler.angle.pitch, euler.angle.yaw,
                earth.axis.x, earth.axis.y, earth.axis.z);
 }
