@@ -11,61 +11,25 @@ import sys
 import matplotlib.pyplot as pyplot
 import numpy
 
-
-
-
 # Import sensor data
-data = numpy.genfromtxt("C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/outputFile.txt", delimiter=",", skip_header=1)
+data = numpy.genfromtxt("C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/outputFile1.txt", delimiter=",")
 
 sample_rate = 100  # 100 Hz
 
+print(data.shape)
+print(data[0])
+# print(data[0:14, 0:19])
+
 timestamp = data[:, 0]
 euler = data[:, 1:4]
-
-print(euler)
-# gyroscope = data[:, 1:4]
-# accelerometer = data[:, 4:7]
-# magnetometer = data[:, 7:10]
+internal_states = data[:, 4:10]
+flags = data[:, 10:14]
 
 
-# euler = numpy.empty((len(timestamp), 3))
-# internal_states = numpy.empty((len(timestamp), 6))
-# flags = numpy.empty((len(timestamp), 4))
-
-# initialize linear acceleration
-# linearX = numpy.empty(len(3))
-# linearY = numpy.empty(len(3))
-# linearZ = numpy.empty(len(3))
-
-# for index in range(len(timestamp)):
-    
-#     # print(ahrs.earth_acceleration)
-    
-#     # gyroscope[index] = offset.update(gyroscope[index])
-
-#     # ahrs.update(gyroscope[index], accelerometer[index], magnetometer[index], delta_time[index])
-
-#     euler[index] = ahrs.quaternion.to_euler()
-
-#     ahrs_internal_states = ahrs.internal_states
-#     internal_states[index] = numpy.array([ahrs_internal_states.acceleration_error,
-#                                           ahrs_internal_states.accelerometer_ignored,
-#                                           ahrs_internal_states.acceleration_recovery_trigger,
-#                                           ahrs_internal_states.magnetic_error,
-#                                           ahrs_internal_states.magnetometer_ignored,
-#                                           ahrs_internal_states.magnetic_recovery_trigger])
-
-#     ahrs_flags = ahrs.flags
-#     flags[index] = numpy.array([ahrs_flags.initialising,
-#                                 ahrs_flags.angular_rate_recovery,
-#                                 ahrs_flags.acceleration_recovery,
-#                                 ahrs_flags.magnetic_recovery])
-    
-#     # linearX[index] = ahrs.getLinear
-    
-    
-
-
+print(timestamp[0])
+print(euler[0])
+print(internal_states[0])
+print(flags[0])
 
 def plot_bool(axis, x, y, label):
     axis.plot(x, y, "tab:cyan", label=label)
@@ -87,38 +51,39 @@ axes[0].set_ylabel("Degrees")
 axes[0].grid()
 axes[0].legend()
 
-# # Plot initialising flag
-# plot_bool(axes[1], timestamp, flags[:, 0], "Initialising")
+# Plot initialising flag
+plot_bool(axes[1], timestamp, flags[:, 0], "Initialising")
 
-# # Plot angular rate recovery flag
-# plot_bool(axes[2], timestamp, flags[:, 1], "Angular rate recovery")
+# Plot angular rate recovery flag
+plot_bool(axes[2], timestamp, flags[:, 1], "Angular rate recovery")
 
-# # Plot acceleration rejection internal states and flag
-# axes[3].plot(timestamp, internal_states[:, 0], "tab:olive", label="Acceleration error")
-# axes[3].set_ylabel("Degrees")
-# axes[3].grid()
-# axes[3].legend()
+# Plot acceleration rejection internal states and flag
+axes[3].plot(timestamp, internal_states[:, 0], "tab:olive", label="Acceleration error")
+axes[3].set_ylabel("Degrees")
+axes[3].grid()
+axes[3].legend()
 
-# plot_bool(axes[4], timestamp, internal_states[:, 1], "Accelerometer ignored")
+plot_bool(axes[4], timestamp, internal_states[:, 1], "Accelerometer ignored")
 
-# axes[5].plot(timestamp, internal_states[:, 2], "tab:orange", label="Acceleration recovery trigger")
-# axes[5].grid()
-# axes[5].legend()
+axes[5].plot(timestamp, internal_states[:, 2], "tab:orange", label="Acceleration recovery trigger")
+axes[5].grid()
+axes[5].legend()
 
-# plot_bool(axes[6], timestamp, flags[:, 2], "Acceleration recovery")
+plot_bool(axes[6], timestamp, flags[:, 2], "Acceleration recovery")
 
-# # Plot magnetic rejection internal states and flag
-# axes[7].plot(timestamp, internal_states[:, 3], "tab:olive", label="Magnetic error")
-# axes[7].set_ylabel("Degrees")
-# axes[7].grid()
-# axes[7].legend()
+# Plot magnetic rejection internal states and flag
+axes[7].plot(timestamp, internal_states[:, 3], "tab:olive", label="Magnetic error")
+axes[7].set_ylabel("Degrees")
+axes[7].grid()
+axes[7].legend()
 
-# plot_bool(axes[8], timestamp, internal_states[:, 4], "Magnetometer ignored")
+plot_bool(axes[8], timestamp, internal_states[:, 4], "Magnetometer ignored")
 
-# axes[9].plot(timestamp, internal_states[:, 5], "tab:orange", label="Magnetic recovery trigger")
-# axes[9].grid()
-# axes[9].legend()
+axes[9].plot(timestamp, internal_states[:, 5], "tab:orange", label="Magnetic recovery trigger")
+axes[9].grid()
+axes[9].legend()
 
-# plot_bool(axes[10], timestamp, flags[:, 3], "Magnetic recovery")
+plot_bool(axes[10], timestamp, flags[:, 3], "Magnetic recovery")
 
 pyplot.show(block="no_block" not in sys.argv)  # don't block when script run by CI
+

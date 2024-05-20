@@ -810,10 +810,27 @@ void test(madMatrix gyroscopeMisalignment,
         printf("Roll %0.2f, Pitch %0.2f, Yaw %0.2f, X %0.2f, Y %0.2f, Z %0.2f\n",
                euler.angle.roll, euler.angle.pitch, euler.angle.yaw,
                earth.axis.x, earth.axis.y, earth.axis.z);
-
+        
+        madInternalStates internal = getInternalStates(&ahrs);
+        madFlags flags = getFlags(&ahrs);
         // update file
         // Write to file in the desired format
-        outputFile << timestamp << "," << euler.angle.roll << "," << euler.angle.pitch << "," << euler.angle.yaw << std::endl;
+        outputFile << timestamp << "," 
+        << euler.angle.roll << ","
+        << euler.angle.pitch << "," 
+        << euler.angle.yaw << ","
+        << internal.accelError << ","
+        << internal.accelIgnored << ","
+        << internal.accelRecoveryTrigger << ","
+        << internal.magneticError << ","
+        << internal.magnoIgnored << ","
+        << internal.magneticRecoveryTrigger << ","
+        << flags.initialization << ","
+        << flags.angularRateRecovery << ","
+        << flags.accelRecovery << ","
+        << flags.magneticRecovery
+        << std::endl;
+
 }
 
 #define SAMPLE_RATE (100) // replace this with actual sample rate
@@ -880,7 +897,7 @@ int main() {
     setParams(&ahrs, &settings);
 
     std::ofstream outputFile;
-    outputFile.open("outputFile.txt");
+    outputFile.open("outputFile1.txt");
 
     // Print the contents of each vector in the list
     for (const auto& vec : listOfVectors) {
