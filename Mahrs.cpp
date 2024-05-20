@@ -13,6 +13,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 // #include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\MahrsHPP::
 
 // using namespace MahrsHPP;
@@ -787,6 +788,9 @@ struct SensorData {
     double magX, magY, magZ;
 };
 
+// sensorData(double inTime, 
+// double ingyroX, double ingyroY, double ingyroZ,double inaccelX, double inaccelY, double inaccelZ, double inmagX, double inmagY, double inmagZ) : time{inTime}, gyroX{ingyroX}, gyroY{ingyroY}, gyroZ{ingyroZ}, accelX{inaccelX}, accelY{inaccelY}, accelZ{inaccelZ}, magX{inmagX}, magY{inmagY}, magZ{inmagZ} {};
+
 #define SAMPLE_RATE (100) // replace this with actual sample rate
 
 int main() {
@@ -798,25 +802,31 @@ int main() {
     }
 
     std::vector<SensorData> sensorData;
+    std::string token;
+    std::vector<double> values;
 
     std::string line;
+    std::getline(inputFile, line); // remove header
+
     while (std::getline(inputFile, line)) {
+        std::istringstream iss(line);
+        // std::cerr << line << std::endl;
         // reads every line 
-        
-        // std::istringstream iss(line);
-        // SensorData data;
-        // char comma;
-        // iss >> data.time >> comma
-        //     >> data.gyroX >> comma
-        //     >> data.gyroY >> comma
-        //     >> data.gyroZ >> comma
-        //     >> data.accelX >> comma
-        //     >> data.accelY >> comma
-        //     >> data.accelZ >> comma
-        //     >> data.magX >> comma
-        //     >> data.magY >> comma
-        //     >> data.magZ;
-        // sensorData.push_back(data);
+        while (std::getline(iss, token, ',')) {
+            try {
+                float value = std::stod(token);
+                // std::cout << value << std::endl;
+                values.push_back(value);
+            } catch (const std::invalid_argument& e) {
+                // Handle invalid tokens (e.g., non-numeric values)
+                std::cerr << "Error parsing token: " << token << std::endl;
+            }
+        }
+
+        for (const auto& value : values) {
+            std::cout << value << ", ";
+        }
+        std::cout << std::endl;
     }
 
     // Now you have sensorData populated with individual data points.
@@ -881,9 +891,9 @@ int main() {
         const madEuler euler = quaternionToEuler(getQuaternion(&ahrs));
         const madVector earth = getEarthAcceleration(&ahrs);
 
-        printf("Roll %0.1f, Pitch %0.1f, Yaw %0.1f, X %0.1f, Y %0.1f, Z %0.1f\n",
-               euler.angle.roll, euler.angle.pitch, euler.angle.yaw,
-               earth.axis.x, earth.axis.y, earth.axis.z);
+        // printf("Roll %0.1f, Pitch %0.1f, Yaw %0.1f, X %0.1f, Y %0.1f, Z %0.1f\n",
+        //        euler.angle.roll, euler.angle.pitch, euler.angle.yaw,
+        //        earth.axis.x, earth.axis.y, earth.axis.z);
     }
 
 
