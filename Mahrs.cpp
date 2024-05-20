@@ -765,21 +765,6 @@ float compassCalculateHeading(const madVector accelerometer, const madVector mag
     return radsToDeg(atan2f(west.axis.x, north.axis.x));
 }
 ///---------------------------------------------
-// std::vector<std::string> getNextLineAndSplitIntoTokens(std::istream& str) {
-//     std::vector<std::string> result;
-//     std::string line;
-//     std::getline(str, line);
-//     std::stringstream lineStream(line);
-//     std::string cell;
-//     while (std::getline(lineStream, cell, ',')) {
-//         result.push_back(cell);
-//     }
-//     // Check for a trailing comma with no data after it.
-//     if (!lineStream && cell.empty()) {
-//         result.push_back("");
-//     }
-//     return result;
-// }
 
 void test(madMatrix gyroscopeMisalignment,
     madVector gyroscopeSensitivity,
@@ -827,27 +812,9 @@ void test(madMatrix gyroscopeMisalignment,
                earth.axis.x, earth.axis.y, earth.axis.z);
 
         // update file
-        // outputFile << euler.angle.roll, euler.angle.pitch, euler.angle.yaw;
-        // outputFile << "\n";
-        // sizeof(euler.angle.roll) + sizeof(euler.angle.roll) + sizeof(euler.angle.roll)
-        // unsigned int size = sizeof(euler.angle.roll) + sizeof(euler.angle.pitch) + sizeof(euler.angle.yaw);
-
-        // char buffer[ size ];
-        // snprintf( buffer, sizeof( buffer ),
-        // "[%ic],[%ic],[%ic]\n",
-        // euler.angle.roll, euler.angle.pitch, euler.angle.yaw);
-
         // Write to file in the desired format
         outputFile << timestamp << "," << euler.angle.roll << "," << euler.angle.pitch << "," << euler.angle.yaw << std::endl;
-
-        // outputFile << buffer;   
-
 }
-
-
-
-// sensorData(double inTime, 
-// double ingyroX, double ingyroY, double ingyroZ,double inaccelX, double inaccelY, double inaccelZ, double inmagX, double inmagY, double inmagZ) : time{inTime}, gyroX{ingyroX}, gyroY{ingyroY}, gyroZ{ingyroZ}, accelX{inaccelX}, accelY{inaccelY}, accelZ{inaccelZ}, magX{inmagX}, magY{inmagY}, magZ{inmagZ} {};
 
 #define SAMPLE_RATE (100) // replace this with actual sample rate
 
@@ -917,12 +884,6 @@ int main() {
 
     // Print the contents of each vector in the list
     for (const auto& vec : listOfVectors) {
-        // for (const auto& value : vec) {
-        //     std::cout << value << ", ";
-        // }
-        // std::cout << std::endl;
-        // sensorData. = 1.4f;
-
         sensorData = {
             vec[0],
             vec[1],
