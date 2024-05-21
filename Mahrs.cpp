@@ -81,7 +81,7 @@ void setParams(MahrsStruct *const mahrs, const params *const parameters){
 void mahrsInitialisation(MahrsStruct *const mahrs){
     params parameters1 = {
         0.5f,
-        0.5f,
+        0.0f,
         90.0f,
         90.0f,
         0,
@@ -161,7 +161,7 @@ void Update(MahrsStruct *const mahrs, const madVector gyro, const madVector acce
     /* Ramp down the gain during the initialization phase of the Mahrs algorithm. */
     if(mahrs->initialisation){
         
-        mahrs->rampedGain -= mahrs->rampedGainStep * deltaT;
+        mahrs->rampedGain -= mahrs->rampedGainStep * (deltaT*1000);
         std::cout << mahrs->rampedGain << "," << mahrs->rampedGainStep << ", " << deltaT << std::endl;
         if((mahrs->rampedGain < mahrs->Parameters.algorithmGain) || (mahrs->Parameters.algorithmGain == 0.0f)){
             mahrs->rampedGain = mahrs->Parameters.algorithmGain;

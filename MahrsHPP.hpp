@@ -120,16 +120,16 @@ typedef struct {
 
 
     // math structs
-    typedef union {
-        float array[3];
+typedef union {
+    float array[3];
 
-        struct{
-            float roll;
-            float pitch;
-            float yaw;
-        } angle;
+    struct{
+        float roll;
+        float pitch;
+        float yaw;
+    } angle;
 
-    } madEuler;
+} madEuler;
 
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
