@@ -38,12 +38,15 @@ ahrs.settings = imufusion.Settings(imufusion.CONVENTION_NED,
                                    5 * sample_rate)  # recovery trigger period = 5 seconds
 
 # Process sensor data
+print(timestamp[-2] - timestamp[-1])
 delta_time = numpy.diff(timestamp, prepend=timestamp[0])
 
 euler = numpy.empty((len(timestamp), 3))
 internal_states = numpy.empty((len(timestamp), 6))
 flags = numpy.empty((len(timestamp), 4))
 
+
+print(delta_time[:])
 # initialize linear acceleration
 # linearX = numpy.empty(len(3))
 # linearY = numpy.empty(len(3))
@@ -51,7 +54,7 @@ flags = numpy.empty((len(timestamp), 4))
 
 for index in range(len(timestamp)):
     
-    print(ahrs.earth_acceleration)
+    # print(ahrs.earth_acceleration)
     
     gyroscope[index] = offset.update(gyroscope[index])
 

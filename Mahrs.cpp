@@ -160,7 +160,9 @@ void Update(MahrsStruct *const mahrs, const madVector gyro, const madVector acce
 
     /* Ramp down the gain during the initialization phase of the Mahrs algorithm. */
     if(mahrs->initialisation){
+        
         mahrs->rampedGain -= mahrs->rampedGainStep * deltaT;
+        std::cout << mahrs->rampedGain << "," << mahrs->rampedGainStep << ", " << deltaT << std::endl;
         if((mahrs->rampedGain < mahrs->Parameters.algorithmGain) || (mahrs->Parameters.algorithmGain == 0.0f)){
             mahrs->rampedGain = mahrs->Parameters.algorithmGain;
             mahrs->initialisation = false;
@@ -780,7 +782,7 @@ void test(madMatrix gyroscopeMisalignment,
     std::ofstream &outputFile){
     // Acquire latest sensor data
         const float timestamp = data.time; // replace this with actual gyroscope timestamp
-        std::cout << data.time << std::endl;
+        // std::cout << data.time << std::endl;
         madVector gyroscope = {data.gyroX, data.gyroY, data.gyroZ}; // replace this with actual gyroscope data in degrees/s
         madVector accelerometer = {data.accelX, data.accelY, data.accelZ}; // replace this with actual accelerometer data in g
         madVector magnetometer = {data.magX, data.magY, data.magZ}; // replace this with actual magnetometer data in arbitrary units
@@ -795,10 +797,11 @@ void test(madMatrix gyroscopeMisalignment,
 
         // Calculate delta time (in seconds) to account for gyroscope sample clock error
         float previousTimestamp;
-        const float deltaTime = (float) (timestamp - previousTimestamp) / (float) CLOCKS_PER_SEC;
+        // const float deltaTime = (float) (timestamp - previousTimestamp) / (float) CLOCKS_PER_SEC;
+        const float deltaTime = (float) (timestamp - previousTimestamp);
         previousTimestamp = timestamp;
 
-        std::cout << deltaTime << std::endl;
+        // std::cout << deltaTime << std::endl;
 
         // Update gyroscope AHRS algorithm
         Update(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
@@ -894,6 +897,7 @@ int main() {
             10.0f,
             5 * SAMPLE_RATE, /* 5 seconds */
     };
+
     setParams(&ahrs, &settings);
 
     std::ofstream outputFile;
