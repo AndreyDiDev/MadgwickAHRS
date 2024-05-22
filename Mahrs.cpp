@@ -160,8 +160,7 @@ void Update(MahrsStruct *const mahrs, const madVector gyro, const madVector acce
 
     /* Ramp down the gain during the initialization phase of the Mahrs algorithm. */
     if(mahrs->initialisation){
-        
-        mahrs->rampedGain -= mahrs->rampedGainStep * (deltaT*1000);
+        mahrs->rampedGain -= mahrs->rampedGainStep * deltaT;
         std::cout << mahrs->rampedGain << "," << mahrs->rampedGainStep << ", " << deltaT << std::endl;
         if((mahrs->rampedGain < mahrs->Parameters.algorithmGain) || (mahrs->Parameters.algorithmGain == 0.0f)){
             mahrs->rampedGain = mahrs->Parameters.algorithmGain;
@@ -777,7 +776,7 @@ void test(madMatrix gyroscopeMisalignment,
     madMatrix softIronMatrix,
     madVector hardIronOffset, 
     madOffset offset, 
-    MahrsStruct ahrs,
+    MahrsStruct *ahrs,
     SensorData data,
     std::ofstream &outputFile){
     // Acquire latest sensor data
@@ -788,9 +787,9 @@ void test(madMatrix gyroscopeMisalignment,
         madVector magnetometer = {data.magX, data.magY, data.magZ}; // replace this with actual magnetometer data in arbitrary units
 
         // Apply calibration
-        gyroscope = calibrationInertial(gyroscope, gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset);
-        accelerometer = calibrationInertial(accelerometer, accelerometerMisalignment, accelerometerSensitivity, accelerometerOffset);
-        magnetometer = calibrationMagnetic(magnetometer, softIronMatrix, hardIronOffset);
+        // gyroscope = calibrationInertial(gyroscope, gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset);
+        // accelerometer = calibrationInertial(accelerometer, accelerometerMisalignment, accelerometerSensitivity, accelerometerOffset);
+        // magnetometer = calibrationMagnetic(magnetometer, softIronMatrix, hardIronOffset);
 
         // Update gyroscope offset correction algorithm
         gyroscope = offsetUpdate(&offset, gyroscope);
@@ -798,24 +797,25 @@ void test(madMatrix gyroscopeMisalignment,
         // Calculate delta time (in seconds) to account for gyroscope sample clock error
         float previousTimestamp;
         // const float deltaTime = (float) (timestamp - previousTimestamp) / (float) CLOCKS_PER_SEC;
-        const float deltaTime = (float) (timestamp - previousTimestamp);
+        float deltaTime = (float) (timestamp - previousTimestamp);
         previousTimestamp = timestamp;
+        // deltaTime = deltaTime * 1000;
 
         // std::cout << deltaTime << std::endl;
 
         // Update gyroscope AHRS algorithm
-        Update(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
+        Update(ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
 
         // Print algorithm outputs
-        const madEuler euler = quaternionToEuler(getQuaternion(&ahrs));
-        const madVector earth = getEarthAcceleration(&ahrs);
+        madEuler euler = quaternionToEuler(getQuaternion(ahrs));
+        madVector earth = getEarthAcceleration(ahrs);
 
         printf("Roll %0.2f, Pitch %0.2f, Yaw %0.2f, X %0.2f, Y %0.2f, Z %0.2f\n",
                euler.angle.roll, euler.angle.pitch, euler.angle.yaw,
                earth.axis.x, earth.axis.y, earth.axis.z);
         
-        madInternalStates internal = getInternalStates(&ahrs);
-        madFlags flags = getFlags(&ahrs);
+        madInternalStates internal = getInternalStates(ahrs);
+        madFlags flags = getFlags(ahrs);
         // update file
         // Write to file in the desired format
         outputFile << timestamp << "," 
@@ -921,7 +921,7 @@ int main() {
         // printf("%.6f, %.10f, %f\n", sensorData.time, sensorData.gyroX, sensorData.gyroY);
         test(gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset, 
         accelerometerMisalignment,accelerometerSensitivity,accelerometerOffset,
-        softIronMatrix, hardIronOffset, offset, ahrs, sensorData, outputFile);
+        softIronMatrix, hardIronOffset, offset, &ahrs, sensorData, outputFile);
     }
 
     outputFile.close();

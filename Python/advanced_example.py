@@ -39,7 +39,8 @@ ahrs.settings = imufusion.Settings(imufusion.CONVENTION_NED,
 
 # Process sensor data
 print(timestamp[-2] - timestamp[-1])
-delta_time = numpy.diff(timestamp, prepend=timestamp[0])
+# delta_time = numpy.diff(timestamp, prepend=timestamp[0])
+delta_time = numpy.diff(timestamp)
 
 euler = numpy.empty((len(timestamp), 3))
 internal_states = numpy.empty((len(timestamp), 6))
