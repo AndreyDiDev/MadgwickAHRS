@@ -11,10 +11,10 @@ import sys
 import matplotlib.pyplot as pyplot
 import numpy
 
-print("running this ")
+print("running this 2")
 
 # Import sensor data
-data = numpy.genfromtxt("C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/last.txt", delimiter=",", skip_header=1)
+data = numpy.genfromtxt("C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/last2.txt", delimiter=",", skip_header=1)
 
 sample_rate = 100  # 100 Hz
 

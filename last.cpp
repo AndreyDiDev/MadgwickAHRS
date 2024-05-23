@@ -1,4 +1,5 @@
 /**
+ * @co-author Andrey Dimanchev
  * @file FusionAhrs.c
  * @author Seb Madgwick
  * @brief AHRS algorithm to combine gyroscope, accelerometer, and magnetometer
@@ -507,21 +508,10 @@ void FusionAhrsSetHeading(FusionAhrs *const ahrs, const float heading) {
 }
 
 //------------------------------------------------------------------------------
-// End of file
-
 /**
- * @file FusionCompass.c
- * @author Seb Madgwick
  * @brief Tilt-compensated compass to calculate the magnetic heading using
  * accelerometer and magnetometer measurements.
  */
-
-//------------------------------------------------------------------------------
-// Includes
-
-// #include "FusionAxes.h"
-// #include "FusionCompass.h"
-#include <math.h> // atan2f
 
 //------------------------------------------------------------------------------
 // Functions
@@ -557,21 +547,11 @@ float FusionCompassCalculateHeading(const FusionConvention convention, const Fus
 }
 
 //------------------------------------------------------------------------------
-// End of file
 
 /**
- * @file FusionOffset.c
- * @author Seb Madgwick
  * @brief Gyroscope offset correction algorithm for run-time calibration of the
  * gyroscope offset.
  */
-
-//------------------------------------------------------------------------------
-// Includes
-
-// #include "FusionOffset.h"
-#include <math.h> // fabsf
-
 //------------------------------------------------------------------------------
 // Definitions
 
@@ -635,9 +615,8 @@ FusionVector FusionOffsetUpdate(FusionOffset *const offset, FusionVector gyrosco
 }
 
 //------------------------------------------------------------------------------
-// End of file
 
-// test- --------------------- - - - -  - - - -  - - - - - - - - - - 
+// test class
 #define SAMPLE_RATE (100) // replace this with actual sample rate
 
 void test(FusionMatrix gyroscopeMisalignment,
@@ -652,9 +631,6 @@ void test(FusionMatrix gyroscopeMisalignment,
     FusionAhrs *ahrs,
     SensorData data,
     FILE *file){
-    // This loop should repeat each time new gyroscope data is available
-    // while (true) {
-
         // Acquire latest sensor data
         // const clock_t timestamp = clock(); // replace this with actual gyroscope timestamp
         const float timestamp = data.time;
@@ -691,7 +667,6 @@ void test(FusionMatrix gyroscopeMisalignment,
         static float previousTimestamp;
         float deltaTime = (float) (timestamp - previousTimestamp);
         previousTimestamp = timestamp;
-        // deltaTime = deltaTime * 1000;
 
         // Update gyroscope AHRS algorithm
         FusionAhrsUpdate(ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
@@ -719,12 +694,12 @@ void test(FusionMatrix gyroscopeMisalignment,
 
         fprintf(file, "\n");
 
-        printf("%f,%d,%.0f,%.0f,%d,%.0f,%d,%d,%d,%d", internal.accelerationError, 
-        internal.accelerometerIgnored, internal.accelerationRecoveryTrigger, 
-        internal.magneticError, internal.magnetometerIgnored, internal.magneticRecoveryTrigger, 
-        flags.initialising, flags.angularRateRecovery, flags.accelerationRecovery, flags.magneticRecovery);
+        // printf("%f,%d,%.0f,%.0f,%d,%.0f,%d,%d,%d,%d", internal.accelerationError, 
+        // internal.accelerometerIgnored, internal.accelerationRecoveryTrigger, 
+        // internal.magneticError, internal.magnetometerIgnored, internal.magneticRecoveryTrigger, 
+        // flags.initialising, flags.angularRateRecovery, flags.accelerationRecovery, flags.magneticRecovery);
 
-        printf("\n");
+        // printf("\n");
 }
 
 
@@ -745,7 +720,7 @@ int main() {
     FusionAhrsFlags flags;
     const FusionVector hardIronOffset = {0.0f, 0.0f, 0.0f};
 
-    FILE *file = fopen("last.txt", "a+"); // Open the file for appending or create it if it doesn't exist
+    FILE *file = fopen("last2.txt", "a+"); // Open the file for appending or create it if it doesn't exist
     if (!file) {
         fprintf(stderr, "Error opening file...exiting\n");
         exit(1);
@@ -831,29 +806,4 @@ int main() {
     fclose(file1);
     fclose(file);
 
-    // std::ofstream outputFile;
-    // outputFile.open("outputFile1.txt");
-
-    // // Print the contents of each vector in the list
-    // for (const auto& vec : listOfVectors) {
-    //     sensorData = {
-    //         vec[0],
-    //         vec[1],
-    //         vec[2],
-    //         vec[3],
-    //         vec[4],
-    //         vec[5],
-    //         vec[6],
-    //         vec[7],
-    //         vec[8],
-    //         vec[9],
-    //     };
-
-    //     // printf("%.6f, %.10f, %f\n", sensorData.time, sensorData.gyroX, sensorData.gyroY);
-    //     test(gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset, 
-    //     accelerometerMisalignment,accelerometerSensitivity,accelerometerOffset,
-    //     softIronMatrix, hardIronOffset, offset, ahrs, sensorData, outputFile);
-    // }
-
-    // outputFile.close();
 }

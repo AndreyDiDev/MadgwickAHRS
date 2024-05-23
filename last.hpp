@@ -1,11 +1,9 @@
 /**
- * @file FusionConvention.h
+ * @co-author Andrey Dimanchev
+ * @file last.hpp
  * @author Seb Madgwick
  * @brief Earth axes convention.
  */
-
-// #ifndef FUSION_CONVENTION_H
-// #define FUSION_CONVENTION_H
 
 //------------------------------------------------------------------------------
 // Definitions
@@ -22,16 +20,10 @@ typedef enum {
 // #endif
 
 //------------------------------------------------------------------------------
-// End of file
 
 /**
- * @file FusionMath.h
- * @author Seb Madgwick
- * @brief Math library.
+ * @brief Math library
  */
-
-// #ifndef FUSION_MATH_H
-// #define FUSION_MATH_H
 
 //------------------------------------------------------------------------------
 // Includes
@@ -501,14 +493,9 @@ static inline FusionEuler FusionQuaternionToEuler(const FusionQuaternion quatern
 #undef Q
 }
 
-// #endif
-
 //------------------------------------------------------------------------------
-// End of file
 
 /**
- * @file FusionAhrs.h
- * @author Seb Madgwick
  * @brief AHRS algorithm to combine gyroscope, accelerometer, and magnetometer
  * measurements into a single measurement of orientation relative to the Earth.
  */
@@ -518,9 +505,6 @@ static inline FusionEuler FusionQuaternionToEuler(const FusionQuaternion quatern
 
 //------------------------------------------------------------------------------
 // Includes
-
-// #include "FusionConvention.h"
-// #include "FusionMath.h"
 #include <stdbool.h>
 
 //------------------------------------------------------------------------------
@@ -603,13 +587,7 @@ void FusionAhrsUpdateNoMagnetometer(FusionAhrs *const ahrs, const FusionVector g
 
 void FusionAhrsUpdateExternalHeading(FusionAhrs *const ahrs, const FusionVector gyroscope, const FusionVector accelerometer, const float heading, const float deltaTime);
 
-// FusionQuaternion FusionAhrsGetQuaternion(const FusionAhrs *const ahrs);
-
 void FusionAhrsSetQuaternion(FusionAhrs *const ahrs, const FusionQuaternion quaternion);
-
-// FusionVector FusionAhrsGetLinearAcceleration(const FusionAhrs *const ahrs);
-
-// FusionVector FusionAhrsGetEarthAcceleration(const FusionAhrs *const ahrs);
 
 FusionAhrsInternalStates FusionAhrsGetInternalStates(const FusionAhrs *const ahrs);
 
@@ -617,24 +595,11 @@ FusionAhrsFlags FusionAhrsGetFlags(const FusionAhrs *const ahrs);
 
 void FusionAhrsSetHeading(FusionAhrs *const ahrs, const float heading);
 
-// #endif
 
 //------------------------------------------------------------------------------
-// End of file
-
 /**
- * @file FusionAxes.h
- * @author Seb Madgwick
  * @brief Swaps sensor axes for alignment with the body axes.
  */
-
-// #ifndef FUSION_AXES_H
-// #define FUSION_AXES_H
-
-//------------------------------------------------------------------------------
-// Includes
-
-// #include "FusionMath.h"
 
 //------------------------------------------------------------------------------
 // Definitions
@@ -805,24 +770,11 @@ static inline FusionVector FusionAxesSwap(const FusionVector sensor, const Fusio
     return sensor; // avoid compiler warning
 }
 
-// #endif
-
 //------------------------------------------------------------------------------
-// End of file
 
 /**
- * @file FusionCalibration.h
- * @author Seb Madgwick
  * @brief Gyroscope, accelerometer, and magnetometer calibration models.
  */
-
-// #ifndef FUSION_CALIBRATION_H
-// #define FUSION_CALIBRATION_H
-
-//------------------------------------------------------------------------------
-// Includes
-
-// #include "FusionMath.h"
 
 //------------------------------------------------------------------------------
 // Inline functions
@@ -850,53 +802,23 @@ static inline FusionVector FusionCalibrationMagnetic(const FusionVector uncalibr
     return FusionMatrixMultiplyVector(softIronMatrix, FusionVectorSubtract(uncalibrated, hardIronOffset));
 }
 
-// #endif
-
 //------------------------------------------------------------------------------
-// End of file
 
 /**
- * @file FusionCompass.h
- * @author Seb Madgwick
  * @brief Tilt-compensated compass to calculate the magnetic heading using
  * accelerometer and magnetometer measurements.
  */
-
-// #ifndef FUSION_COMPASS_H
-// #define FUSION_COMPASS_H
-
-//------------------------------------------------------------------------------
-// Includes
-
-// #include "FusionConvention.h"
-// #include "FusionMath.h"
 
 //------------------------------------------------------------------------------
 // Function declarations
 
 float FusionCompassCalculateHeading(const FusionConvention convention, const FusionVector accelerometer, const FusionVector magnetometer);
 
-// #endif
-
 //------------------------------------------------------------------------------
-// End of file
-
-
-
 /**
- * @file FusionOffset.h
- * @author Seb Madgwick
  * @brief Gyroscope offset correction algorithm for run-time calibration of the
  * gyroscope offset.
  */
-
-// #ifndef FUSION_OFFSET_H
-// #define FUSION_OFFSET_H
-
-//------------------------------------------------------------------------------
-// Includes
-
-// #include "FusionMath.h"
 
 //------------------------------------------------------------------------------
 // Definitions
