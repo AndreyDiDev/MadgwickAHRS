@@ -11,25 +11,27 @@ import sys
 import matplotlib.pyplot as pyplot
 import numpy
 
+print("running this ")
+
 # Import sensor data
-data = numpy.genfromtxt("C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/secondLast6.txt", delimiter=",", skip_header=1)
+data = numpy.genfromtxt("C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/last.txt", delimiter=",", skip_header=1)
 
 sample_rate = 100  # 100 Hz
 
-print(data.shape)
-print(data[0])
+# print(data.shape)
+# print(data[0])
 # print(data[0:14, 0:19])
 
 timestamp = data[:, 0]
 euler = data[:, 1:4]
-internal_states = data[:, 4:10]
-flags = data[:, 10:15]
+internal_states = numpy.array(data[:, 4:10])
+flags = numpy.array(data[:, 10:15])
 
-
-print(timestamp[0])
-print(euler[0])
-print(internal_states[0])
-print(flags[0])
+print(timestamp[-2] - timestamp[-1])
+# print(timestamp[0])
+# print(euler[0])
+# print(internal_states[0])
+# print(flags[0])
 
 def plot_bool(axis, x, y, label):
     axis.plot(x, y, "tab:cyan", label=label)

@@ -11,9 +11,6 @@ import imufusion
 import matplotlib.pyplot as pyplot
 import numpy
 
-
-
-
 # Import sensor data
 data = numpy.genfromtxt("C:/Users/Andrey/Documents/Fusion-main/Fusion-main/Python/sensor_data.csv", delimiter=",", skip_header=1)
 
@@ -23,6 +20,8 @@ timestamp = data[:, 0]
 gyroscope = data[:, 1:4]
 accelerometer = data[:, 4:7]
 magnetometer = data[:, 7:10]
+
+print(numpy.shape(data))
 
 # Instantiate algorithms
 offset = imufusion.Offset(sample_rate)
@@ -76,6 +75,9 @@ for index in range(len(timestamp)):
                                 ahrs_flags.angular_rate_recovery,
                                 ahrs_flags.acceleration_recovery,
                                 ahrs_flags.magnetic_recovery])
+    
+    print(internal_states[index])
+    print(flags[index])
     
     # linearX[index] = ahrs.getLinear
     

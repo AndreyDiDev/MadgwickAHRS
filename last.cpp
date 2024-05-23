@@ -9,7 +9,7 @@
 // Includes
 
 #include <float.h> // FLT_MAX
-#include "secondLast.h"
+#include "last.hpp"
 #include <math.h> // atan2f, cosf, fabsf, powf, sinf
 #include <stdbool.h>
 #include <stdio.h>
@@ -745,7 +745,7 @@ int main() {
     FusionAhrsFlags flags;
     const FusionVector hardIronOffset = {0.0f, 0.0f, 0.0f};
 
-    FILE *file = fopen("secondLast7.txt", "a+"); // Open the file for appending or create it if it doesn't exist
+    FILE *file = fopen("last.txt", "a+"); // Open the file for appending or create it if it doesn't exist
     if (!file) {
         fprintf(stderr, "Error opening file...exiting\n");
         exit(1);
