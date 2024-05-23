@@ -12,7 +12,7 @@ import matplotlib.pyplot as pyplot
 import numpy
 
 # Import sensor data
-data = numpy.genfromtxt("C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/outputFile1.txt", delimiter=",")
+data = numpy.genfromtxt("C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/secondLast6.txt", delimiter=",", skip_header=1)
 
 sample_rate = 100  # 100 Hz
 
@@ -23,7 +23,7 @@ print(data[0])
 timestamp = data[:, 0]
 euler = data[:, 1:4]
 internal_states = data[:, 4:10]
-flags = data[:, 10:14]
+flags = data[:, 10:15]
 
 
 print(timestamp[0])
