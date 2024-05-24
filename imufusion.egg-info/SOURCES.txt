@@ -1,0 +1,7 @@
+setup.py
+C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/Mahrs.cpp
+C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/Python/Python-C-API/imufusion.c
+imufusion.egg-info/PKG-INFO
+imufusion.egg-info/SOURCES.txt
+imufusion.egg-info/dependency_links.txt
+imufusion.egg-info/top_level.txt

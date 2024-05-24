@@ -2,13 +2,14 @@
 #define AHRS_H
 
 // #include "../../Fusion/Fusion.h"
-// #include "Flags.h"
-// #include "Helpers.h"
-// #include "InternalStates.h"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\Python\Python-C-API\Flags.h"
+#include "Helpers.h"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\Python\Python-C-API\InternalStates.h"
 #include <Python.h>
-// #include "Quaternion.h"
-// #include "Settings.h"
-#include "../AHRSRepo/MadgwickAHRS/MarhsHPP.hpp"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\Python\Python-C-API\Quaternion.h"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\Python\Python-C-API\Settings.h"
+// #include "../AHRSRepo/MadgwickAHRS/MarhsHPP.hpp"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\MahrsHPP.hpp"
 #include <stdlib.h>
 
 typedef struct {

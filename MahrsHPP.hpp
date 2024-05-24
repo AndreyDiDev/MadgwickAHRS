@@ -19,6 +19,52 @@ typedef struct{
     unsigned int recoveryTriggerPeriod;
 } params;
 
+typedef struct {
+    float time;
+    float gyroX, gyroY, gyroZ;
+    float accelX, accelY, accelZ;
+    float magX, magY, magZ;
+}SensorData;
+
+typedef union {
+    float array[3];
+
+    struct {
+        float x;
+        float y;
+        float z;
+    } axis;
+
+} madVector;
+
+    typedef union {
+        float array[4];
+
+        struct{
+            float w;
+            float x;
+            float y;
+            float z;
+        }element;
+    } madQuaternion;
+
+typedef union{
+    float array[3][3];
+
+    struct{
+        float xx;
+        float xy;
+        float xz;
+        float yx;
+        float yy;
+        float yz;
+        float zx;
+        float zy;
+        float zz;
+    } element;
+
+} madMatrix;
+
 typedef struct
 {
     params Parameters;
@@ -47,6 +93,7 @@ typedef struct
 
 } MahrsStruct;
 
+
 typedef struct{
     float accelError;
     bool accelIgnored;
@@ -73,68 +120,43 @@ typedef struct {
 
 
     // math structs
-    typedef union {
-        float array[3];
+typedef union {
+    float array[3];
 
-        struct{
-            float roll;
-            float pitch;
-            float yaw;
-        } angle;
-    } madEuler;
+    struct{
+        float roll;
+        float pitch;
+        float yaw;
+    } angle;
 
-    typedef union {
-        float array[3];
+} madEuler;
 
-        struct {
-            float x;
-            float y;
-            float z;
-        } axis;
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
 
-    } madVector;
 
-    typedef union {
-        float array[4];
-
-        struct{
-            float w;
-            float x;
-            float y;
-            float z;
-        }element;
-    } madQuaternion;
-
-    typedef union{
-        float array[3][3];
-
-        struct{
-            float xx;
-            float xy;
-            float xz;
-
-            float yx;
-            float yy;
-            float yz;
-
-            float zx;
-            float zy;
-            float zz;
-        } element;
-
-    } madMatrix;
-
-#define VECTOR_ZERO ((madVector){.array = {0.0f, 0.0f, 0.0f} })
+#define VECTOR_ZERO madVector {.array = {0.0f, 0.0f, 0.0f} }
 #define IDENTITY_QUATERNION ((madQuaternion){.array = {1.0f, 0.0f, 0.0f, 0.0f} })
+/**
+ * @brief Identity matrix.
+ */
+#define IDENTITY_MATRIX ((madMatrix){ .array = {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}} })
+
+
+#define EULER_ZERO ((madEuler){ .array = {0.0f, 0.0f, 0.0f} })
 
 /* Macros/Enums ------------------------------------------------------------*/
 
 
 /* Class ------------------------------------------------------------------*/
-class MahrsHPP
-{
-	public:
+// class MahrsHPP
+// {
+// 	public:
     // function declarations 
+        static inline madEuler quaternionToEuler(const madQuaternion quaternion);
+
+        static inline float degToRads(const float degrees);
 
         // setup functions 
         void mahrsInitialisation(MahrsStruct *const mahrs);
@@ -164,11 +186,12 @@ class MahrsHPP
 
         madVector getEarthAcceleration(const MahrsStruct *const mahrs);
 
+        void setHeading(MahrsStruct *const mahrs, const float heading);
+
         // math 
+        static inline madVector vectorSubtract(const madVector vectorA, const madVector vectorB);
 
         static inline int Clamp(const int value, const int min, const int max);
-
-        static inline float degToRads(const float degrees);
 
         static inline float Asin(const float value);
 
@@ -184,7 +207,7 @@ class MahrsHPP
 
         static inline float VectorMagSquared(const madVector vector);
 
-        static inline madVector vectorHadamarProduct(const madVector vectorA, const madVector vectorB);
+        static inline madVector vectorHadamardProduct(const madVector vectorA, const madVector vectorB);
 
         static inline float vectorSum(const madVector vector);
 
@@ -194,7 +217,7 @@ class MahrsHPP
 
         static inline madVector vectorMultiplyScalar(const madVector vector, const float scalar);
 
-        static inline madVector vectorSubtract(const madVector vectorA, const madVector vectorB);
+        static inline madVector vectorAdd(const madVector vectorA, const madVector vectorB);
 
         static inline madQuaternion quaternionAdd(const madQuaternion quaternionA, const madQuaternion quaternionB);
 
@@ -209,24 +232,51 @@ class MahrsHPP
 
         void setQuaternion(MahrsStruct *const mahrs, const madQuaternion quaternion);
 
-        madVector getLinearAcceleration(const MahrsStruct *const mahrs);
+        static inline madVector matrixMultiplyVector(const madMatrix matrix, const madVector vector);
 
-        madVector getEarthAcceleration(const MahrsStruct *const mahrs);
+        // madVector getLinearAcceleration(const MahrsStruct *const mahrs);
+
+        // madVector getEarthAcceleration(const MahrsStruct *const mahrs);
 
         madFlags getFlags(const MahrsStruct *const mahrs);
 
         static inline madMatrix quaternionToMatrix(const madQuaternion quaternion);
 
-        static inline madEuler quaternionToEuler(const madQuaternion quaternion);
+        
 
         float compassCalculateHeading(const madVector accelerometer, const madVector magnetometer);
 
-	protected:
+        /**
+ * @brief Gyroscope and accelerometer calibration model.
+ * @param uncalibrated Uncalibrated measurement.
+ * @param misalignment Misalignment matrix.
+ * @param sensitivity Sensitivity.
+ * @param offset Offset.
+ * @return Calibrated measurement.
+ */
+static inline madVector calibrationInertial(const madVector uncalibrated, const madMatrix misalignment, const madVector sensitivity, const madVector offset) {
+    return matrixMultiplyVector(misalignment, vectorHadamardProduct(vectorSubtract(uncalibrated, offset), sensitivity));
+}
+
+
+/**
+ * @brief Magnetometer calibration model.
+ * @param uncalibrated Uncalibrated measurement.
+ * @param softIronMatrix Soft-iron matrix.
+ * @param hardIronOffset Hard-iron offset.
+ * @return Calibrated measurement.
+ */
+static inline madVector calibrationMagnetic(const madVector uncalibrated, const madMatrix softIronMatrix, const madVector hardIronOffset) {
+    return matrixMultiplyVector(softIronMatrix, vectorSubtract(uncalibrated, hardIronOffset));
+}
+
+
+	// protected:
 	    // Data
 	    // AccelGyroMagnetismData* data;
 
-	private:
+	// private:
 
-};
+// };
 
 #endif

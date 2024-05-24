@@ -2,8 +2,9 @@
 #define COMPASS_H
 
 // #include "../../Fusion/Fusion.h"
-#include "../AHRSRepo/MadgwickAHRS/MarhsHPP.hpp"
-#include "Helpers.h"
+// #include "../AHRSRepo/MadgwickAHRS/MarhsHPP.hpp"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\MahrsHPP.hpp"
+#include "C:\Users\Andrey\Documents\AHRSRepo\MadgwickAHRS\Python\Python-C-API\Helpers.h"
 #include <numpy/arrayobject.h>
 #include <Python.h>
 #include <stdlib.h>

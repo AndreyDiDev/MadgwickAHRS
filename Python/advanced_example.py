@@ -1,7 +1,15 @@
+
+# print(PYTHON_INCLUDE_PATH)
+
+# import sys 
+# help('modules')
+# print(sys.path)
+import sys
+# sys.path.append('''C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/Python''')
+
 import imufusion
 import matplotlib.pyplot as pyplot
 import numpy
-import sys
 
 # Import sensor data
 data = numpy.genfromtxt("C:/Users/Andrey/Documents/Fusion-main/Fusion-main/Python/sensor_data.csv", delimiter=",", skip_header=1)
@@ -13,25 +21,32 @@ gyroscope = data[:, 1:4]
 accelerometer = data[:, 4:7]
 magnetometer = data[:, 7:10]
 
+print(numpy.shape(data))
+
 # Instantiate algorithms
 offset = imufusion.Offset(sample_rate)
 ahrs = imufusion.Ahrs()
 
 
 
-ahrs.settings = imufusion.Settings(imufusion.0.5,  # gain
+ahrs.settings = imufusion.Settings(imufusion.CONVENTION_NED,
+                                   0.5,  # gain
                                    2000,  # gyroscope range
                                    10,  # acceleration rejection
                                    10,  # magnetic rejection
                                    5 * sample_rate)  # recovery trigger period = 5 seconds
 
 # Process sensor data
+print(timestamp[-2] - timestamp[-1])
 delta_time = numpy.diff(timestamp, prepend=timestamp[0])
+# delta_time = numpy.diff(timestamp)
 
 euler = numpy.empty((len(timestamp), 3))
 internal_states = numpy.empty((len(timestamp), 6))
 flags = numpy.empty((len(timestamp), 4))
 
+
+print(delta_time[:])
 # initialize linear acceleration
 # linearX = numpy.empty(len(3))
 # linearY = numpy.empty(len(3))
@@ -39,7 +54,7 @@ flags = numpy.empty((len(timestamp), 4))
 
 for index in range(len(timestamp)):
     
-    print(ahrs.earth_acceleration)
+    # print(ahrs.earth_acceleration)
     
     gyroscope[index] = offset.update(gyroscope[index])
 
@@ -60,6 +75,9 @@ for index in range(len(timestamp)):
                                 ahrs_flags.angular_rate_recovery,
                                 ahrs_flags.acceleration_recovery,
                                 ahrs_flags.magnetic_recovery])
+    
+    print(internal_states[index])
+    print(flags[index])
     
     # linearX[index] = ahrs.getLinear
     
