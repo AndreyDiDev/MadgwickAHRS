@@ -4,6 +4,9 @@
  * @author Seb Madgwick
  * @brief AHRS algorithm to combine gyroscope, accelerometer, and magnetometer
  * measurements into a single measurement of orientation relative to the Earth.
+ * 
+ * Implementation of Madgwick's IMU and AHRS algorithms.
+ * See: https://x-io.co.uk/open-source-imu-and-ahrs-algorithms/
  */
 
 //------------------------------------------------------------------------------
@@ -17,6 +20,7 @@
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctime>
 
 //------------------------------------------------------------------------------
 // Definitions
@@ -109,7 +113,25 @@ void FusionAhrsSetSettings(FusionAhrs *const ahrs, const FusionAhrsSettings *con
 
 /**
  * @brief Updates the AHRS algorithm using the gyroscope, accelerometer, and
- * magnetometer measurements.
+ * magnetometer measurements. Acts more like a wrapper for the low and 
+ * high pass filter, all of the MARG operations are abstracted in other 
+ * functions
+ * 
+ * MARG Operations
+ * 0. Do repetitive multiplication
+ * 1. Normalise the accelerometer measurement
+ * 2. Normalise the magnetometer measurement
+ * 3. Compute the objective function and Jacobian
+ * 4. Compute the gradient (matrix multiplication)
+ * 5. Normalise the gradient to estimate direction of the gyroscope error
+ * 6. Compute angular estimated direction of the gyroscope error
+ * 7. Compute and remove the gyroscope biases
+ * 8. Compute the quaternion rate measured by gyroscopes
+ * 9. Compute then integrate the estimated quaternion rate
+ * 10.Normalise quaternion
+ * 11.Compute flux in the earth frame
+ * 12.Normalise the flux vector to have only components in the x and z
+ * 
  * @param ahrs AHRS algorithm structure.
  * @param gyroscope Gyroscope measurement in degrees per second.
  * @param accelerometer Accelerometer measurement in g.
@@ -146,6 +168,8 @@ void FusionAhrsUpdate(FusionAhrs *const ahrs, const FusionVector gyroscope, cons
     // Calculate accelerometer feedback
     FusionVector halfAccelerometerFeedback = FUSION_VECTOR_ZERO;
     ahrs->accelerometerIgnored = true;
+
+    // Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalisation)
     if (FusionVectorIsZero(accelerometer) == false) {
 
         // Calculate accelerometer feedback scaled by 0.5
@@ -177,6 +201,8 @@ void FusionAhrsUpdate(FusionAhrs *const ahrs, const FusionVector gyroscope, cons
     // Calculate magnetometer feedback
     FusionVector halfMagnetometerFeedback = FUSION_VECTOR_ZERO;
     ahrs->magnetometerIgnored = true;
+
+    // Use IMU algorithm if magnetometer measurement invalid (avoids NaN in magnetometer normalisation)
     if (FusionVectorIsZero(magnetometer) == false) {
 
         // Calculate direction of magnetic field indicated by algorithm
@@ -752,6 +778,9 @@ int main() {
     }
     // read first line and preset the deltaTime to timestamp 
     char line[MAX_LINE_LENGTH];
+    std::clock_t start;
+    double duration;
+    
     while (fgets(line, sizeof(line), file1)) {
         // Tokenize the line using strtok
         char *token = strtok(line, ",");
@@ -797,11 +826,20 @@ int main() {
         // Example: Print all sensor readings
         // printf("Time: %.6f s, Gyro: (%.6f, %.6f, %.6f) deg/s, Accel: (%.6f, %.6f, %.6f) g, Mag: (%.6f, %.6f, %.6f) uT\n",
         //        time, gyroX, gyroY, gyroZ, accelX, accelY, accelZ, magX, magY, magZ);
+        start = std::clock();
 
         test(gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset, 
         accelerometerMisalignment,accelerometerSensitivity,accelerometerOffset,
         softIronMatrix, hardIronOffset, offset, &ahrs, sensorData, file);
+
+        clock_t endTime = std::clock();
+
+        duration += endTime - start;
+
+        printf("Time for one more (seconds): %f\n", duration/CLOCKS_PER_SEC);
     }
+
+    printf("Overall for (13k samples): %f", duration/CLOCKS_PER_SEC);
 
     fclose(file1);
     fclose(file);
