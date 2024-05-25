@@ -728,8 +728,179 @@ void test(FusionMatrix gyroscopeMisalignment,
         // printf("\n");
 }
 
-
 #define MAX_LINE_LENGTH 1024
+
+void testCircleInternal(FusionOffset offset, 
+    FusionAhrs *ahrs,
+    SensorData data,
+    FILE *file)
+{
+    // Acquire latest sensor data
+        // const clock_t timestamp = clock(); // replace this with actual gyroscope timestamp
+        const float timestamp = data.time;
+        FusionVector gyroscope = {data.gyroX, data.gyroY, data.gyroZ}; // replace this with actual gyroscope data in degrees/s
+        FusionVector accelerometer = {data.accelX, data.accelY, data.accelZ}; // replace this with actual accelerometer data in g
+        FusionVector magnetometer = {data.magX, data.magY, data.magZ}; // replace this with actual magnetometer data in arbitrary units
+
+        FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(ahrs));
+        FusionVector earth = FusionAhrsGetEarthAcceleration(ahrs);
+
+        // printf("Before anything Time: %.6f s, Gyro: (%.6f, %.6f, %.6f) deg/s, Accel: (%.6f, %.6f, %.6f) g, Mag: (%.6f, %.4f, %.6f) uT\n",
+        //     data.time, data.gyroX, data.gyroY, data.gyroZ, data.accelX, data.accelY, data.accelZ, data.magX, data.magY, data.magZ);
+
+        // printf("Roll %0.3f, Pitch %0.3f, Yaw %0.3f, X %0.3f, Y %0.3f, Z %0.3f\n",
+        //        euler.angle.roll, euler.angle.pitch, euler.angle.yaw,
+        //        earth.axis.x, earth.axis.y, earth.axis.z);
+
+        // Apply calibration
+        // gyroscope = FusionCalibrationInertial(gyroscope, gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset);
+        // accelerometer = FusionCalibrationInertial(accelerometer, accelerometerMisalignment, accelerometerSensitivity, accelerometerOffset);
+        // magnetometer = FusionCalibrationMagnetic(magnetometer, softIronMatrix, hardIronOffset);
+
+        // Update gyroscope offset correction algorithm
+        gyroscope = FusionOffsetUpdate(&offset, gyroscope);
+
+        // printf("Offset update Gyro: (%.6f, %.6f, %.6f) deg/s, Accel: (%.6f, %.6f, %.6f) g, Mag: (%.6f, %.4f, %.6f) uT\n",
+        //     data.gyroX, data.gyroY, data.gyroZ, data.accelX, data.accelY, data.accelZ, data.magX, data.magY, data.magZ);
+
+        // printf("Roll %0.3f, Pitch %0.3f, Yaw %0.3f, X %0.3f, Y %0.3f, Z %0.3f\n",
+        //        euler.angle.roll, euler.angle.pitch, euler.angle.yaw,
+        //        earth.axis.x, earth.axis.y, earth.axis.z);
+
+        // Calculate delta time (in seconds) to account for gyroscope sample clock error
+        static float previousTimestamp;
+        float deltaTime = (float) (timestamp - previousTimestamp);
+        previousTimestamp = timestamp;
+
+        // Update gyroscope AHRS algorithm
+        FusionAhrsUpdate(ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
+
+        // printf("After Update - Time: %.6f s, Gyro: (%.6f, %.6f, %.6f) deg/s, Accel: (%.6f, %.6f, %.6f) g, Mag: (%.6f, %.4f, %.6f) uT, deltaT: %.10f\n",
+        //     data.time, data.gyroX, data.gyroY, data.gyroZ, data.accelX, data.accelY, data.accelZ, data.magX, data.magY, data.magZ, deltaTime);
+
+        // Print algorithm outputs
+        FusionAhrsInternalStates internal;
+        FusionAhrsFlags flags;
+
+        euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(ahrs));
+
+        internal = FusionAhrsGetInternalStates(ahrs);
+        flags = FusionAhrsGetFlags(ahrs);
+
+        fprintf(file, "%f,", timestamp);
+
+        fprintf(file, "%f,%f,%f,", euler.angle.roll, euler.angle.pitch, euler.angle.yaw);
+
+        fprintf(file, "%f,%d,%.0f,%.0f,%d,%.0f,%d,%d,%d,%d", internal.accelerationError,  
+        internal.accelerometerIgnored, internal.accelerationRecoveryTrigger, internal.magneticError, 
+        internal.magnetometerIgnored, internal.magneticRecoveryTrigger, flags.initialising, 
+        flags.angularRateRecovery, flags.accelerationRecovery, flags.magneticRecovery);
+
+        fprintf(file, "%f,%f,%f", earth.axis.x, earth.axis.y, earth.axis.z);
+
+        fprintf(file, "\n");
+
+}
+
+void testCircle(){
+
+    FILE *fileCircle = fopen("circle1.txt", "a+"); // Open the file for appending or create it if it doesn't exist
+    if (!fileCircle) {
+        fprintf(stderr, "Error opening file...exiting\n");
+        exit(1);
+    }
+
+    // Initialise algorithms
+    FusionOffset offset;
+    FusionAhrs ahrs;
+
+    FusionOffsetInitialise(&offset, SAMPLE_RATE);
+    FusionAhrsInitialise(&ahrs);
+
+    // Set AHRS algorithm settings
+    const FusionAhrsSettings settings = {
+            .convention = FusionConventionNed,
+            .gain = 0.5f,
+            .gyroscopeRange = 2000.0f, /* replace this with actual gyroscope range in degrees/s */
+            .accelerationRejection = 10.0f,
+            .magneticRejection = 10.0f,
+            .recoveryTriggerPeriod = 5 * SAMPLE_RATE, /* 5 seconds */
+    };
+
+    FusionAhrsSetSettings(&ahrs, &settings);
+
+    FILE *fileCircleData = fopen("C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/circle.csv", "r");
+    if (!fileCircleData) {
+        perror("Error opening file");
+        // return 1;
+    }
+    // read first line and preset the deltaTime to timestamp 
+    char line[MAX_LINE_LENGTH];
+    std::clock_t start;
+    double duration;
+    
+    while (fgets(line, sizeof(line), fileCircleData)) {
+        // Tokenize the line using strtok
+        char *token = strtok(line, ",");
+        float time = atof(token); // Convert the time value to float
+
+        // Parse accelerometer readings (X, Y, Z)
+        token = strtok(NULL, ",");
+        float accelX = atof(token);
+        token = strtok(NULL, ",");
+        float accelY = atof(token);
+        token = strtok(NULL, ",");
+        float accelZ = atof(token);
+
+        // Parse gyroscope readings (X, Y, Z)
+        token = strtok(NULL, ",");
+        float gyroX = atof(token);
+        token = strtok(NULL, ",");
+        float gyroY = atof(token);
+        token = strtok(NULL, ",");
+        float gyroZ = atof(token);
+
+        // Parse magnetometer readings (X, Y, Z)
+        // token = strtok(NULL, ",");
+        // float magX = atof(token);
+        // token = strtok(NULL, ",");
+        // float magY = atof(token);
+        // token = strtok(NULL, ",");
+        // float magZ = atof(token);
+
+        SensorData sensorData = {
+            time,
+            gyroX,
+            gyroY,
+            gyroZ,
+            accelX,
+            accelY,
+            accelZ,
+            // magX,
+            // magY,
+            // magZ,
+        };
+
+        // Example: Print all sensor readings
+        // printf("Time: %.6f s, Gyro: (%.6f, %.6f, %.6f) deg/s, Accel: (%.6f, %.6f, %.6f) g, Mag: (%.6f, %.6f, %.6f) uT\n",
+        //        time, gyroX, gyroY, gyroZ, accelX, accelY, accelZ, magX, magY, magZ);
+        start = std::clock();
+
+        testCircleInternal(offset, &ahrs, sensorData, fileCircle);
+
+        clock_t endTime = std::clock();
+
+        duration += endTime - start;
+
+        printf("Time for one more circle (seconds): %f\n", duration/CLOCKS_PER_SEC);
+    }
+
+    printf("Overall for circle (1.7k samples): %f", duration/CLOCKS_PER_SEC);
+
+    fclose(fileCircle);
+    fclose(fileCircleData);
+
+}
 
 int main() {
 
@@ -746,7 +917,7 @@ int main() {
     FusionAhrsFlags flags;
     const FusionVector hardIronOffset = {0.0f, 0.0f, 0.0f};
 
-    FILE *file = fopen("last2.txt", "a+"); // Open the file for appending or create it if it doesn't exist
+    FILE *file = fopen("last3.txt", "a+"); // Open the file for appending or create it if it doesn't exist
     if (!file) {
         fprintf(stderr, "Error opening file...exiting\n");
         exit(1);
@@ -843,5 +1014,7 @@ int main() {
 
     fclose(file1);
     fclose(file);
+
+    testCircle();
 
 }
