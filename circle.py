@@ -58,3 +58,27 @@ axes[3].legend()
 
 pyplot.show()
 
+data = numpy.genfromtxt("C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/circle1.txt", delimiter=",", skip_header=1)
+
+acceleration = data[:, 13:16]
+
+def integrate_accelerations(ax_values, ay_values, dt):
+    vx, vy, x, y = 0.0, 0.0, 0.0, 0.0
+
+    for ax, ay in zip(ax_values, ay_values):
+        # Update velocities
+        vx += ax * dt
+        vy += ay * dt
+
+        # Update positions
+        x += vx * dt
+        y += vy * dt
+
+    return [x, y]
+
+position = numpy.empty((len(acceleration), 2))
+
+for index in range(len(acceleration)):
+    position[index] = integrate_accelerations(acceleration[0], acceleration[1], data[index, 0])
+
+print(position)
