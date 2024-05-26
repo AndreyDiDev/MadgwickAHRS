@@ -48,8 +48,44 @@ axes[2].set_xlabel("Time (s)")
 axes[2].grid()
 axes[2].legend()
 
+data = numpy.genfromtxt("C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/circle1.txt", delimiter=",", skip_header=1)
+
+acceleration = data[:, 13:16]
+
+def integrate_acceleration(initial_position, initial_velocity, acceleration_values, dt):
+    x, v = initial_position, initial_velocity
+    positions = [x]
+
+    for a in acceleration_values:
+        # Update velocity
+        v += a * dt
+
+        # Update position
+        x += v * dt
+        positions.append(x)
+
+    return positions
+
+positions = numpy.empty((len(acceleration), 2))
+
+initial_x = 0.0  # Initial position
+initial_v = 0.0  # Initial velocity
+# acceleration_values = [2.0, 1.5, 3.0, 2.5]  # Replace with your actual acceleration data
+time_step = 0.01  # Time step (in seconds)
+
+final_positions = integrate_acceleration(initial_x, initial_v, acceleration[:,0], time_step)
+final_positionsY = integrate_acceleration(initial_x, initial_v, acceleration[:,1], time_step)
+
+
+# for index in range(len(acceleration)):
+#     position[index] = integrate_accelerations(acceleration[0], acceleration[1], data[index, 0])
+
+print(final_positions)
+
 # axes[3].scatter(x, y, color='b', label='Data points')
 axes[3].plot(x, y, linestyle='--', color='r', label='Line connecting points')
+axes[3].plot(final_positions, final_positionsY)
+
 axes[3].set_ylabel('x')
 axes[3].set_xlabel('y')
 # axes[3].set_title('Scatter Plot of x vs. y')
@@ -57,28 +93,3 @@ axes[3].grid(True)
 axes[3].legend()
 
 pyplot.show()
-
-data = numpy.genfromtxt("C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/circle1.txt", delimiter=",", skip_header=1)
-
-acceleration = data[:, 13:16]
-
-def integrate_accelerations(ax_values, ay_values, dt):
-    vx, vy, x, y = 0.0, 0.0, 0.0, 0.0
-
-    for ax, ay in zip(ax_values, ay_values):
-        # Update velocities
-        vx += ax * dt
-        vy += ay * dt
-
-        # Update positions
-        x += vx * dt
-        y += vy * dt
-
-    return [x, y]
-
-position = numpy.empty((len(acceleration), 2))
-
-for index in range(len(acceleration)):
-    position[index] = integrate_accelerations(acceleration[0], acceleration[1], data[index, 0])
-
-print(position)
