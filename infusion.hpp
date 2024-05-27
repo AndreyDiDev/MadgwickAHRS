@@ -1,37 +1,15 @@
 /**
- * @file FusionConvention.h
+ * @co-author Andrey Dimanchev
+ * @file last.hpp
  * @author Seb Madgwick
  * @brief Earth axes convention.
  */
 
-// #ifndef FUSION_CONVENTION_H
-// #define FUSION_CONVENTION_H
-
 //------------------------------------------------------------------------------
-// Definitions
 
 /**
- * @brief Earth axes convention.
+ * @brief Math library
  */
-typedef enum {
-    FusionConventionNwu, /* North-West-Up */
-    FusionConventionEnu, /* East-North-Up */
-    FusionConventionNed, /* North-East-Down */
-} FusionConvention;
-
-// #endif
-
-//------------------------------------------------------------------------------
-// End of file
-
-/**
- * @file FusionMath.h
- * @author Seb Madgwick
- * @brief Math library.
- */
-
-// #ifndef FUSION_MATH_H
-// #define FUSION_MATH_H
 
 //------------------------------------------------------------------------------
 // Includes
@@ -44,6 +22,15 @@ typedef enum {
 // Definitions
 
 /**
+ * @brief Earth axes convention.
+ */
+typedef enum {
+    EarthConventionNwu, /* North-West-Up */
+    EarthConventionEnu, /* East-North-Up */
+    EarthConventionNed, /* North-East-Down */
+} EarthConvention;
+
+/**
  * @brief 3D vector.
  */
 typedef union {
@@ -54,7 +41,7 @@ typedef union {
         float y;
         float z;
     } axis;
-} FusionVector;
+} madVector;
 
 /**
  * @brief Quaternion.
@@ -68,7 +55,7 @@ typedef union {
         float y;
         float z;
     } element;
-} FusionQuaternion;
+} madQuaternion;
 
 /**
  * @brief 3x3 matrix in row-major order.
@@ -88,7 +75,7 @@ typedef union {
         float zy;
         float zz;
     } element;
-} FusionMatrix;
+} madMatrix;
 
 /**
  * @brief Euler angles.  Roll, pitch, and yaw correspond to rotations around
@@ -102,32 +89,32 @@ typedef union {
         float pitch;
         float yaw;
     } angle;
-} FusionEuler;
+} madEuler;
 
 /**
  * @brief Vector of zeros.
  */
-#define FUSION_VECTOR_ZERO ((FusionVector){ .array = {0.0f, 0.0f, 0.0f} })
+#define VECTOR_ZERO ((madVector){ .array = {0.0f, 0.0f, 0.0f} })
 
 /**
  * @brief Vector of ones.
  */
-#define FUSION_VECTOR_ONES ((FusionVector){ .array = {1.0f, 1.0f, 1.0f} })
+#define VECTOR_ONES ((madVector){ .array = {1.0f, 1.0f, 1.0f} })
 
 /**
  * @brief Identity quaternion.
  */
-#define FUSION_IDENTITY_QUATERNION ((FusionQuaternion){ .array = {1.0f, 0.0f, 0.0f, 0.0f} })
+#define IDENTITY_QUATERNION ((madQuaternion){ .array = {1.0f, 0.0f, 0.0f, 0.0f} })
 
 /**
  * @brief Identity matrix.
  */
-#define FUSION_IDENTITY_MATRIX ((FusionMatrix){ .array = {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}} })
+#define FUSION_IDENTITY_MATRIX ((madMatrix){ .array = {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}} })
 
 /**
  * @brief Euler angles of zero.
  */
-#define FUSION_EULER_ZERO ((FusionEuler){ .array = {0.0f, 0.0f, 0.0f} })
+#define EULER_ZERO ((madEuler){ .array = {0.0f, 0.0f, 0.0f} })
 
 /**
  * @brief Pi. May not be defined in math.h.
@@ -137,10 +124,49 @@ typedef union {
 #endif
 
 /**
- * @brief Include this definition or add as a preprocessor definition to use
- * normal square root operations.
+ * @brief Axes alignment describing the sensor axes relative to the body axes.
+ * For example, if the body X axis is aligned with the sensor Y axis and the
+ * body Y axis is aligned with sensor X axis but pointing the opposite direction
+ * then alignment is +Y-X+Z.
  */
-//#define FUSION_USE_NORMAL_SQRT
+typedef enum {
+    MadAxesAlignmentPXPYPZ, /* +X+Y+Z */
+    MadAxesAlignmentPXNZPY, /* +X-Z+Y */
+    MadAxesAlignmentPXNYNZ, /* +X-Y-Z */
+    MadAxesAlignmentPXPZNY, /* +X+Z-Y */
+    MadAxesAlignmentNXPYNZ, /* -X+Y-Z */
+    MadAxesAlignmentNXPZPY, /* -X+Z+Y */
+    MadAxesAlignmentNXNYPZ, /* -X-Y+Z */
+    MadAxesAlignmentNXNZNY, /* -X-Z-Y */
+    MadAxesAlignmentPYNXPZ, /* +Y-X+Z */
+    MadAxesAlignmentPYNZNX, /* +Y-Z-X */
+    MadAxesAlignmentPYPXNZ, /* +Y+X-Z */
+    MadAxesAlignmentPYPZPX, /* +Y+Z+X */
+    MadAxesAlignmentNYPXPZ, /* -Y+X+Z */
+    MadAxesAlignmentNYNZPX, /* -Y-Z+X */
+    MadAxesAlignmentNYNXNZ, /* -Y-X-Z */
+    MadAxesAlignmentNYPZNX, /* -Y+Z-X */
+    MadAxesAlignmentPZPYNX, /* +Z+Y-X */
+    MadAxesAlignmentPZPXPY, /* +Z+X+Y */
+    MadAxesAlignmentPZNYPX, /* +Z-Y+X */
+    MadAxesAlignmentPZNXNY, /* +Z-X-Y */
+    MadAxesAlignmentNZPYPX, /* -Z+Y+X */
+    MadAxesAlignmentNZNXPY, /* -Z-X+Y */
+    MadAxesAlignmentNZNYNX, /* -Z-Y-X */
+    MadAxesAlignmentNZPXNY, /* -Z+X-Y */
+} MadAxesAlignment;
+
+/**
+ * @brief Gyroscope offset algorithm structure.  Structure members are used
+ * internally and must not be accessed by the application.
+ */
+typedef struct {
+    float filterCoefficient;
+    unsigned int timeout;
+    unsigned int timer;
+    madVector gyroscopeOffset;
+} madOffset;
+
 
 //------------------------------------------------------------------------------
 // Inline functions - Degrees and radians conversion
@@ -150,7 +176,7 @@ typedef union {
  * @param degrees Degrees.
  * @return Radians.
  */
-static inline float FusionDegreesToRadians(const float degrees) {
+static inline float DegreesToRadians(const float degrees) {
     return degrees * ((float) M_PI / 180.0f);
 }
 
@@ -159,7 +185,7 @@ static inline float FusionDegreesToRadians(const float degrees) {
  * @param radians Radians.
  * @return Degrees.
  */
-static inline float FusionRadiansToDegrees(const float radians) {
+static inline float RadiansToDegrees(const float radians) {
     return radians * (180.0f / (float) M_PI);
 }
 
@@ -214,7 +240,7 @@ static inline float FusionFastInverseSqrt(const float x) {
  * @param vector Vector.
  * @return True if the vector is zero.
  */
-static inline bool FusionVectorIsZero(const FusionVector vector) {
+static inline bool madVectorIsZero(const madVector vector) {
     return (vector.axis.x == 0.0f) && (vector.axis.y == 0.0f) && (vector.axis.z == 0.0f);
 }
 
@@ -224,8 +250,8 @@ static inline bool FusionVectorIsZero(const FusionVector vector) {
  * @param vectorB Vector B.
  * @return Sum of two vectors.
  */
-static inline FusionVector FusionVectorAdd(const FusionVector vectorA, const FusionVector vectorB) {
-    const FusionVector result = {.axis = {
+static inline madVector madVectorAdd(const madVector vectorA, const madVector vectorB) {
+    const madVector result = {.axis = {
             .x = vectorA.axis.x + vectorB.axis.x,
             .y = vectorA.axis.y + vectorB.axis.y,
             .z = vectorA.axis.z + vectorB.axis.z,
@@ -239,8 +265,8 @@ static inline FusionVector FusionVectorAdd(const FusionVector vectorA, const Fus
  * @param vectorB Vector B.
  * @return Vector B subtracted from vector A.
  */
-static inline FusionVector FusionVectorSubtract(const FusionVector vectorA, const FusionVector vectorB) {
-    const FusionVector result = {.axis = {
+static inline madVector madVectorSubtract(const madVector vectorA, const madVector vectorB) {
+    const madVector result = {.axis = {
             .x = vectorA.axis.x - vectorB.axis.x,
             .y = vectorA.axis.y - vectorB.axis.y,
             .z = vectorA.axis.z - vectorB.axis.z,
@@ -253,7 +279,7 @@ static inline FusionVector FusionVectorSubtract(const FusionVector vectorA, cons
  * @param vector Vector.
  * @return Sum of the elements.
  */
-static inline float FusionVectorSum(const FusionVector vector) {
+static inline float madVectorSum(const madVector vector) {
     return vector.axis.x + vector.axis.y + vector.axis.z;
 }
 
@@ -263,8 +289,8 @@ static inline float FusionVectorSum(const FusionVector vector) {
  * @param scalar Scalar.
  * @return Multiplication of a vector by a scalar.
  */
-static inline FusionVector FusionVectorMultiplyScalar(const FusionVector vector, const float scalar) {
-    const FusionVector result = {.axis = {
+static inline madVector madVectorMultiplyScalar(const madVector vector, const float scalar) {
+    const madVector result = {.axis = {
             .x = vector.axis.x * scalar,
             .y = vector.axis.y * scalar,
             .z = vector.axis.z * scalar,
@@ -278,8 +304,8 @@ static inline FusionVector FusionVectorMultiplyScalar(const FusionVector vector,
  * @param vectorB Vector B.
  * @return Hadamard product.
  */
-static inline FusionVector FusionVectorHadamardProduct(const FusionVector vectorA, const FusionVector vectorB) {
-    const FusionVector result = {.axis = {
+static inline madVector madVectorHadamardProduct(const madVector vectorA, const madVector vectorB) {
+    const madVector result = {.axis = {
             .x = vectorA.axis.x * vectorB.axis.x,
             .y = vectorA.axis.y * vectorB.axis.y,
             .z = vectorA.axis.z * vectorB.axis.z,
@@ -293,10 +319,10 @@ static inline FusionVector FusionVectorHadamardProduct(const FusionVector vector
  * @param vectorB Vector B.
  * @return Cross product.
  */
-static inline FusionVector FusionVectorCrossProduct(const FusionVector vectorA, const FusionVector vectorB) {
+static inline madVector madVectorCrossProduct(const madVector vectorA, const madVector vectorB) {
 #define A vectorA.axis
 #define B vectorB.axis
-    const FusionVector result = {.axis = {
+    const madVector result = {.axis = {
             .x = A.y * B.z - A.z * B.y,
             .y = A.z * B.x - A.x * B.z,
             .z = A.x * B.y - A.y * B.x,
@@ -312,8 +338,8 @@ static inline FusionVector FusionVectorCrossProduct(const FusionVector vectorA, 
  * @param vectorB Vector B.
  * @return Dot product.
  */
-static inline float FusionVectorDotProduct(const FusionVector vectorA, const FusionVector vectorB) {
-    return FusionVectorSum(FusionVectorHadamardProduct(vectorA, vectorB));
+static inline float madVectorDotProduct(const madVector vectorA, const madVector vectorB) {
+    return madVectorSum(madVectorHadamardProduct(vectorA, vectorB));
 }
 
 /**
@@ -321,8 +347,8 @@ static inline float FusionVectorDotProduct(const FusionVector vectorA, const Fus
  * @param vector Vector.
  * @return Vector magnitude squared.
  */
-static inline float FusionVectorMagnitudeSquared(const FusionVector vector) {
-    return FusionVectorSum(FusionVectorHadamardProduct(vector, vector));
+static inline float madVectorMagnitudeSquared(const madVector vector) {
+    return madVectorSum(madVectorHadamardProduct(vector, vector));
 }
 
 /**
@@ -330,8 +356,8 @@ static inline float FusionVectorMagnitudeSquared(const FusionVector vector) {
  * @param vector Vector.
  * @return Vector magnitude.
  */
-static inline float FusionVectorMagnitude(const FusionVector vector) {
-    return sqrtf(FusionVectorMagnitudeSquared(vector));
+static inline float madVectorMagnitude(const madVector vector) {
+    return sqrtf(madVectorMagnitudeSquared(vector));
 }
 
 /**
@@ -339,13 +365,13 @@ static inline float FusionVectorMagnitude(const FusionVector vector) {
  * @param vector Vector.
  * @return Normalised vector.
  */
-static inline FusionVector FusionVectorNormalise(const FusionVector vector) {
+static inline madVector madVectorNormalise(const madVector vector) {
 #ifdef FUSION_USE_NORMAL_SQRT
-    const float magnitudeReciprocal = 1.0f / sqrtf(FusionVectorMagnitudeSquared(vector));
+    const float magnitudeReciprocal = 1.0f / sqrtf(madVectorMagnitudeSquared(vector));
 #else
-    const float magnitudeReciprocal = FusionFastInverseSqrt(FusionVectorMagnitudeSquared(vector));
+    const float magnitudeReciprocal = FusionFastInverseSqrt(madVectorMagnitudeSquared(vector));
 #endif
-    return FusionVectorMultiplyScalar(vector, magnitudeReciprocal);
+    return madVectorMultiplyScalar(vector, magnitudeReciprocal);
 }
 
 //------------------------------------------------------------------------------
@@ -357,8 +383,8 @@ static inline FusionVector FusionVectorNormalise(const FusionVector vector) {
  * @param quaternionB Quaternion B.
  * @return Sum of two quaternions.
  */
-static inline FusionQuaternion FusionQuaternionAdd(const FusionQuaternion quaternionA, const FusionQuaternion quaternionB) {
-    const FusionQuaternion result = {.element = {
+static inline madQuaternion madQuaternionAdd(const madQuaternion quaternionA, const madQuaternion quaternionB) {
+    const madQuaternion result = {.element = {
             .w = quaternionA.element.w + quaternionB.element.w,
             .x = quaternionA.element.x + quaternionB.element.x,
             .y = quaternionA.element.y + quaternionB.element.y,
@@ -373,10 +399,10 @@ static inline FusionQuaternion FusionQuaternionAdd(const FusionQuaternion quater
  * @param quaternionB Quaternion B (to be pre-multiplied).
  * @return Multiplication of two quaternions.
  */
-static inline FusionQuaternion FusionQuaternionMultiply(const FusionQuaternion quaternionA, const FusionQuaternion quaternionB) {
+static inline madQuaternion madQuaternionMultiply(const madQuaternion quaternionA, const madQuaternion quaternionB) {
 #define A quaternionA.element
 #define B quaternionB.element
-    const FusionQuaternion result = {.element = {
+    const madQuaternion result = {.element = {
             .w = A.w * B.w - A.x * B.x - A.y * B.y - A.z * B.z,
             .x = A.w * B.x + A.x * B.w + A.y * B.z - A.z * B.y,
             .y = A.w * B.y - A.x * B.z + A.y * B.w + A.z * B.x,
@@ -396,10 +422,10 @@ static inline FusionQuaternion FusionQuaternionMultiply(const FusionQuaternion q
  * @param vector Vector.
  * @return Multiplication of a quaternion with a vector.
  */
-static inline FusionQuaternion FusionQuaternionMultiplyVector(const FusionQuaternion quaternion, const FusionVector vector) {
+static inline madQuaternion madQuaternionMultiplyVector(const madQuaternion quaternion, const madVector vector) {
 #define Q quaternion.element
 #define V vector.axis
-    const FusionQuaternion result = {.element = {
+    const madQuaternion result = {.element = {
             .w = -Q.x * V.x - Q.y * V.y - Q.z * V.z,
             .x = Q.w * V.x + Q.y * V.z - Q.z * V.y,
             .y = Q.w * V.y - Q.x * V.z + Q.z * V.x,
@@ -415,14 +441,14 @@ static inline FusionQuaternion FusionQuaternionMultiplyVector(const FusionQuater
  * @param quaternion Quaternion.
  * @return Normalised quaternion.
  */
-static inline FusionQuaternion FusionQuaternionNormalise(const FusionQuaternion quaternion) {
+static inline madQuaternion madQuaternionNormalise(const madQuaternion quaternion) {
 #define Q quaternion.element
 #ifdef FUSION_USE_NORMAL_SQRT
     const float magnitudeReciprocal = 1.0f / sqrtf(Q.w * Q.w + Q.x * Q.x + Q.y * Q.y + Q.z * Q.z);
 #else
     const float magnitudeReciprocal = FusionFastInverseSqrt(Q.w * Q.w + Q.x * Q.x + Q.y * Q.y + Q.z * Q.z);
 #endif
-    const FusionQuaternion result = {.element = {
+    const madQuaternion result = {.element = {
             .w = Q.w * magnitudeReciprocal,
             .x = Q.x * magnitudeReciprocal,
             .y = Q.y * magnitudeReciprocal,
@@ -441,9 +467,9 @@ static inline FusionQuaternion FusionQuaternionNormalise(const FusionQuaternion 
  * @param vector Vector.
  * @return Multiplication of a matrix with a vector.
  */
-static inline FusionVector FusionMatrixMultiplyVector(const FusionMatrix matrix, const FusionVector vector) {
+static inline madVector madMatrixMultiplyVector(const madMatrix matrix, const madVector vector) {
 #define R matrix.element
-    const FusionVector result = {.axis = {
+    const madVector result = {.axis = {
             .x = R.xx * vector.axis.x + R.xy * vector.axis.y + R.xz * vector.axis.z,
             .y = R.yx * vector.axis.x + R.yy * vector.axis.y + R.yz * vector.axis.z,
             .z = R.zx * vector.axis.x + R.zy * vector.axis.y + R.zz * vector.axis.z,
@@ -460,7 +486,7 @@ static inline FusionVector FusionMatrixMultiplyVector(const FusionMatrix matrix,
  * @param quaternion Quaternion.
  * @return Rotation matrix.
  */
-static inline FusionMatrix FusionQuaternionToMatrix(const FusionQuaternion quaternion) {
+static inline madMatrix madQuaternionToMatrix(const madQuaternion quaternion) {
 #define Q quaternion.element
     const float qwqw = Q.w * Q.w; // calculate common terms to avoid repeated operations
     const float qwqx = Q.w * Q.x;
@@ -469,7 +495,7 @@ static inline FusionMatrix FusionQuaternionToMatrix(const FusionQuaternion quate
     const float qxqy = Q.x * Q.y;
     const float qxqz = Q.x * Q.z;
     const float qyqz = Q.y * Q.z;
-    const FusionMatrix matrix = {.element = {
+    const madMatrix matrix = {.element = {
             .xx = 2.0f * (qwqw - 0.5f + Q.x * Q.x),
             .xy = 2.0f * (qxqy - qwqz),
             .xz = 2.0f * (qxqz + qwqy),
@@ -489,26 +515,21 @@ static inline FusionMatrix FusionQuaternionToMatrix(const FusionQuaternion quate
  * @param quaternion Quaternion.
  * @return Euler angles in degrees.
  */
-static inline FusionEuler FusionQuaternionToEuler(const FusionQuaternion quaternion) {
+static inline madEuler madQuaternionToEuler(const madQuaternion quaternion) {
 #define Q quaternion.element
     const float halfMinusQySquared = 0.5f - Q.y * Q.y; // calculate common terms to avoid repeated operations
-    const FusionEuler euler = {.angle = {
-            .roll = FusionRadiansToDegrees(atan2f(Q.w * Q.x + Q.y * Q.z, halfMinusQySquared - Q.x * Q.x)),
-            .pitch = FusionRadiansToDegrees(FusionAsin(2.0f * (Q.w * Q.y - Q.z * Q.x))),
-            .yaw = FusionRadiansToDegrees(atan2f(Q.w * Q.z + Q.x * Q.y, halfMinusQySquared - Q.z * Q.z)),
+    const madEuler euler = {.angle = {
+            .roll = RadiansToDegrees(atan2f(Q.w * Q.x + Q.y * Q.z, halfMinusQySquared - Q.x * Q.x)),
+            .pitch = RadiansToDegrees(FusionAsin(2.0f * (Q.w * Q.y - Q.z * Q.x))),
+            .yaw = RadiansToDegrees(atan2f(Q.w * Q.z + Q.x * Q.y, halfMinusQySquared - Q.z * Q.z)),
     }};
     return euler;
 #undef Q
 }
 
-// #endif
-
 //------------------------------------------------------------------------------
-// End of file
 
 /**
- * @file FusionAhrs.h
- * @author Seb Madgwick
  * @brief AHRS algorithm to combine gyroscope, accelerometer, and magnetometer
  * measurements into a single measurement of orientation relative to the Earth.
  */
@@ -517,13 +538,7 @@ static inline FusionEuler FusionQuaternionToEuler(const FusionQuaternion quatern
 #define FUSION_AHRS_H
 
 //------------------------------------------------------------------------------
-// Includes
 
-// #include "FusionConvention.h"
-// #include "FusionMath.h"
-#include <stdbool.h>
-
-//------------------------------------------------------------------------------
 // Definitions
 typedef struct {
     float time;
@@ -536,35 +551,35 @@ typedef struct {
  * @brief AHRS algorithm settings.
  */
 typedef struct {
-    FusionConvention convention;
+    EarthConvention convention;
     float gain;
     float gyroscopeRange;
     float accelerationRejection;
     float magneticRejection;
     unsigned int recoveryTriggerPeriod;
-} FusionAhrsSettings;
+} madAhrsSettings;
 
 /**
  * @brief AHRS algorithm structure.  Structure members are used internally and
  * must not be accessed by the application.
  */
 typedef struct {
-    FusionAhrsSettings settings;
-    FusionQuaternion quaternion;
-    FusionVector accelerometer;
+    madAhrsSettings settings;
+    madQuaternion quaternion;
+    madVector accelerometer;
     bool initialising;
     float rampedGain;
     float rampedGainStep;
     bool angularRateRecovery;
-    FusionVector halfAccelerometerFeedback;
-    FusionVector halfMagnetometerFeedback;
+    madVector halfAccelerometerFeedback;
+    madVector halfMagnetometerFeedback;
     bool accelerometerIgnored;
     int accelerationRecoveryTrigger;
     int accelerationRecoveryTimeout;
     bool magnetometerIgnored;
     int magneticRecoveryTrigger;
     int magneticRecoveryTimeout;
-} FusionAhrs;
+} madAhrs;
 
 /**
  * @brief AHRS algorithm internal states.
@@ -576,7 +591,7 @@ typedef struct {
     float magneticError;
     bool magnetometerIgnored;
     float magneticRecoveryTrigger;
-} FusionAhrsInternalStates;
+} madAhrsInternalStates;
 
 /**
  * @brief AHRS algorithm flags.
@@ -586,93 +601,38 @@ typedef struct {
     bool angularRateRecovery;
     bool accelerationRecovery;
     bool magneticRecovery;
-} FusionAhrsFlags;
+} madAhrsFlags;
 
 //------------------------------------------------------------------------------
 // Function declarations
 
-void FusionAhrsInitialise(FusionAhrs *const ahrs);
+void madAhrsInitialise(madAhrs *const ahrs);
 
-void FusionAhrsReset(FusionAhrs *const ahrs);
+void madAhrsReset(madAhrs *const ahrs);
 
-void FusionAhrsSetSettings(FusionAhrs *const ahrs, const FusionAhrsSettings *const settings);
+void madAhrsSetSettings(madAhrs *const ahrs, const madAhrsSettings *const settings);
 
-void FusionAhrsUpdate(FusionAhrs *const ahrs, const FusionVector gyroscope, const FusionVector accelerometer, const FusionVector magnetometer, const float deltaTime);
+void madAhrsUpdate(madAhrs *const ahrs, const madVector gyroscope, const madVector accelerometer, const madVector magnetometer, const float deltaTime);
 
-void reinitialiseGyro(const FusionVector &gyroscope, FusionAhrs *const ahrs);
+void madAhrsUpdateNoMagnetometer(madAhrs *const ahrs, const madVector gyroscope, const madVector accelerometer, const float deltaTime);
 
-void FusionAhrsUpdateNoMagnetometer(FusionAhrs *const ahrs, const FusionVector gyroscope, const FusionVector accelerometer, const float deltaTime);
+void madAhrsUpdateExternalHeading(madAhrs *const ahrs, const madVector gyroscope, const madVector accelerometer, const float heading, const float deltaTime);
 
-void FusionAhrsUpdateExternalHeading(FusionAhrs *const ahrs, const FusionVector gyroscope, const FusionVector accelerometer, const float heading, const float deltaTime);
+void madAhrsSetQuaternion(madAhrs *const ahrs, const madQuaternion quaternion);
 
-// FusionQuaternion FusionAhrsGetQuaternion(const FusionAhrs *const ahrs);
+madAhrsInternalStates madAhrsGetInternalStates(const madAhrs *const ahrs);
 
-void FusionAhrsSetQuaternion(FusionAhrs *const ahrs, const FusionQuaternion quaternion);
+madAhrsFlags madAhrsGetFlags(const madAhrs *const ahrs);
 
-// FusionVector FusionAhrsGetLinearAcceleration(const FusionAhrs *const ahrs);
+void madAhrsSetHeading(madAhrs *const ahrs, const float heading);
 
-// FusionVector FusionAhrsGetEarthAcceleration(const FusionAhrs *const ahrs);
-
-FusionAhrsInternalStates FusionAhrsGetInternalStates(const FusionAhrs *const ahrs);
-
-FusionAhrsFlags FusionAhrsGetFlags(const FusionAhrs *const ahrs);
-
-void FusionAhrsSetHeading(FusionAhrs *const ahrs, const float heading);
-
-// #endif
 
 //------------------------------------------------------------------------------
-// End of file
-
 /**
- * @file FusionAxes.h
- * @author Seb Madgwick
  * @brief Swaps sensor axes for alignment with the body axes.
  */
 
-// #ifndef FUSION_AXES_H
-// #define FUSION_AXES_H
-
 //------------------------------------------------------------------------------
-// Includes
-
-// #include "FusionMath.h"
-
-//------------------------------------------------------------------------------
-// Definitions
-
-/**
- * @brief Axes alignment describing the sensor axes relative to the body axes.
- * For example, if the body X axis is aligned with the sensor Y axis and the
- * body Y axis is aligned with sensor X axis but pointing the opposite direction
- * then alignment is +Y-X+Z.
- */
-typedef enum {
-    FusionAxesAlignmentPXPYPZ, /* +X+Y+Z */
-    FusionAxesAlignmentPXNZPY, /* +X-Z+Y */
-    FusionAxesAlignmentPXNYNZ, /* +X-Y-Z */
-    FusionAxesAlignmentPXPZNY, /* +X+Z-Y */
-    FusionAxesAlignmentNXPYNZ, /* -X+Y-Z */
-    FusionAxesAlignmentNXPZPY, /* -X+Z+Y */
-    FusionAxesAlignmentNXNYPZ, /* -X-Y+Z */
-    FusionAxesAlignmentNXNZNY, /* -X-Z-Y */
-    FusionAxesAlignmentPYNXPZ, /* +Y-X+Z */
-    FusionAxesAlignmentPYNZNX, /* +Y-Z-X */
-    FusionAxesAlignmentPYPXNZ, /* +Y+X-Z */
-    FusionAxesAlignmentPYPZPX, /* +Y+Z+X */
-    FusionAxesAlignmentNYPXPZ, /* -Y+X+Z */
-    FusionAxesAlignmentNYNZPX, /* -Y-Z+X */
-    FusionAxesAlignmentNYNXNZ, /* -Y-X-Z */
-    FusionAxesAlignmentNYPZNX, /* -Y+Z-X */
-    FusionAxesAlignmentPZPYNX, /* +Z+Y-X */
-    FusionAxesAlignmentPZPXPY, /* +Z+X+Y */
-    FusionAxesAlignmentPZNYPX, /* +Z-Y+X */
-    FusionAxesAlignmentPZNXNY, /* +Z-X-Y */
-    FusionAxesAlignmentNZPYPX, /* -Z+Y+X */
-    FusionAxesAlignmentNZNXPY, /* -Z-X+Y */
-    FusionAxesAlignmentNZNYNX, /* -Z-Y-X */
-    FusionAxesAlignmentNZPXNY, /* -Z+X-Y */
-} FusionAxesAlignment;
 
 //------------------------------------------------------------------------------
 // Inline functions
@@ -683,122 +643,122 @@ typedef enum {
  * @param alignment Axes alignment.
  * @return Sensor axes aligned with the body axes.
  */
-static inline FusionVector FusionAxesSwap(const FusionVector sensor, const FusionAxesAlignment alignment) {
-    FusionVector result;
+static inline madVector FusionAxesSwap(const madVector sensor, const MadAxesAlignment alignment) {
+    madVector result;
     switch (alignment) {
-        case FusionAxesAlignmentPXPYPZ:
+        case MadAxesAlignmentPXPYPZ:
             break;
-        case FusionAxesAlignmentPXNZPY:
+        case MadAxesAlignmentPXNZPY:
             result.axis.x = +sensor.axis.x;
             result.axis.y = -sensor.axis.z;
             result.axis.z = +sensor.axis.y;
             return result;
-        case FusionAxesAlignmentPXNYNZ:
+        case MadAxesAlignmentPXNYNZ:
             result.axis.x = +sensor.axis.x;
             result.axis.y = -sensor.axis.y;
             result.axis.z = -sensor.axis.z;
             return result;
-        case FusionAxesAlignmentPXPZNY:
+        case MadAxesAlignmentPXPZNY:
             result.axis.x = +sensor.axis.x;
             result.axis.y = +sensor.axis.z;
             result.axis.z = -sensor.axis.y;
             return result;
-        case FusionAxesAlignmentNXPYNZ:
+        case MadAxesAlignmentNXPYNZ:
             result.axis.x = -sensor.axis.x;
             result.axis.y = +sensor.axis.y;
             result.axis.z = -sensor.axis.z;
             return result;
-        case FusionAxesAlignmentNXPZPY:
+        case MadAxesAlignmentNXPZPY:
             result.axis.x = -sensor.axis.x;
             result.axis.y = +sensor.axis.z;
             result.axis.z = +sensor.axis.y;
             return result;
-        case FusionAxesAlignmentNXNYPZ:
+        case MadAxesAlignmentNXNYPZ:
             result.axis.x = -sensor.axis.x;
             result.axis.y = -sensor.axis.y;
             result.axis.z = +sensor.axis.z;
             return result;
-        case FusionAxesAlignmentNXNZNY:
+        case MadAxesAlignmentNXNZNY:
             result.axis.x = -sensor.axis.x;
             result.axis.y = -sensor.axis.z;
             result.axis.z = -sensor.axis.y;
             return result;
-        case FusionAxesAlignmentPYNXPZ:
+        case MadAxesAlignmentPYNXPZ:
             result.axis.x = +sensor.axis.y;
             result.axis.y = -sensor.axis.x;
             result.axis.z = +sensor.axis.z;
             return result;
-        case FusionAxesAlignmentPYNZNX:
+        case MadAxesAlignmentPYNZNX:
             result.axis.x = +sensor.axis.y;
             result.axis.y = -sensor.axis.z;
             result.axis.z = -sensor.axis.x;
             return result;
-        case FusionAxesAlignmentPYPXNZ:
+        case MadAxesAlignmentPYPXNZ:
             result.axis.x = +sensor.axis.y;
             result.axis.y = +sensor.axis.x;
             result.axis.z = -sensor.axis.z;
             return result;
-        case FusionAxesAlignmentPYPZPX:
+        case MadAxesAlignmentPYPZPX:
             result.axis.x = +sensor.axis.y;
             result.axis.y = +sensor.axis.z;
             result.axis.z = +sensor.axis.x;
             return result;
-        case FusionAxesAlignmentNYPXPZ:
+        case MadAxesAlignmentNYPXPZ:
             result.axis.x = -sensor.axis.y;
             result.axis.y = +sensor.axis.x;
             result.axis.z = +sensor.axis.z;
             return result;
-        case FusionAxesAlignmentNYNZPX:
+        case MadAxesAlignmentNYNZPX:
             result.axis.x = -sensor.axis.y;
             result.axis.y = -sensor.axis.z;
             result.axis.z = +sensor.axis.x;
             return result;
-        case FusionAxesAlignmentNYNXNZ:
+        case MadAxesAlignmentNYNXNZ:
             result.axis.x = -sensor.axis.y;
             result.axis.y = -sensor.axis.x;
             result.axis.z = -sensor.axis.z;
             return result;
-        case FusionAxesAlignmentNYPZNX:
+        case MadAxesAlignmentNYPZNX:
             result.axis.x = -sensor.axis.y;
             result.axis.y = +sensor.axis.z;
             result.axis.z = -sensor.axis.x;
             return result;
-        case FusionAxesAlignmentPZPYNX:
+        case MadAxesAlignmentPZPYNX:
             result.axis.x = +sensor.axis.z;
             result.axis.y = +sensor.axis.y;
             result.axis.z = -sensor.axis.x;
             return result;
-        case FusionAxesAlignmentPZPXPY:
+        case MadAxesAlignmentPZPXPY:
             result.axis.x = +sensor.axis.z;
             result.axis.y = +sensor.axis.x;
             result.axis.z = +sensor.axis.y;
             return result;
-        case FusionAxesAlignmentPZNYPX:
+        case MadAxesAlignmentPZNYPX:
             result.axis.x = +sensor.axis.z;
             result.axis.y = -sensor.axis.y;
             result.axis.z = +sensor.axis.x;
             return result;
-        case FusionAxesAlignmentPZNXNY:
+        case MadAxesAlignmentPZNXNY:
             result.axis.x = +sensor.axis.z;
             result.axis.y = -sensor.axis.x;
             result.axis.z = -sensor.axis.y;
             return result;
-        case FusionAxesAlignmentNZPYPX:
+        case MadAxesAlignmentNZPYPX:
             result.axis.x = -sensor.axis.z;
             result.axis.y = +sensor.axis.y;
             result.axis.z = +sensor.axis.x;
             return result;
-        case FusionAxesAlignmentNZNXPY:
+        case MadAxesAlignmentNZNXPY:
             result.axis.x = -sensor.axis.z;
             result.axis.y = -sensor.axis.x;
             result.axis.z = +sensor.axis.y;
             return result;
-        case FusionAxesAlignmentNZNYNX:
+        case MadAxesAlignmentNZNYNX:
             result.axis.x = -sensor.axis.z;
             result.axis.y = -sensor.axis.y;
             result.axis.z = -sensor.axis.x;
             return result;
-        case FusionAxesAlignmentNZPXNY:
+        case MadAxesAlignmentNZPXNY:
             result.axis.x = -sensor.axis.z;
             result.axis.y = +sensor.axis.x;
             result.axis.z = -sensor.axis.y;
@@ -807,24 +767,11 @@ static inline FusionVector FusionAxesSwap(const FusionVector sensor, const Fusio
     return sensor; // avoid compiler warning
 }
 
-// #endif
-
 //------------------------------------------------------------------------------
-// End of file
 
 /**
- * @file FusionCalibration.h
- * @author Seb Madgwick
  * @brief Gyroscope, accelerometer, and magnetometer calibration models.
  */
-
-// #ifndef FUSION_CALIBRATION_H
-// #define FUSION_CALIBRATION_H
-
-//------------------------------------------------------------------------------
-// Includes
-
-// #include "FusionMath.h"
 
 //------------------------------------------------------------------------------
 // Inline functions
@@ -837,8 +784,8 @@ static inline FusionVector FusionAxesSwap(const FusionVector sensor, const Fusio
  * @param offset Offset.
  * @return Calibrated measurement.
  */
-static inline FusionVector FusionCalibrationInertial(const FusionVector uncalibrated, const FusionMatrix misalignment, const FusionVector sensitivity, const FusionVector offset) {
-    return FusionMatrixMultiplyVector(misalignment, FusionVectorHadamardProduct(FusionVectorSubtract(uncalibrated, offset), sensitivity));
+static inline madVector madCalibrationInertial(const madVector uncalibrated, const madMatrix misalignment, const madVector sensitivity, const madVector offset) {
+    return madMatrixMultiplyVector(misalignment, madVectorHadamardProduct(madVectorSubtract(uncalibrated, offset), sensitivity));
 }
 
 /**
@@ -848,78 +795,36 @@ static inline FusionVector FusionCalibrationInertial(const FusionVector uncalibr
  * @param hardIronOffset Hard-iron offset.
  * @return Calibrated measurement.
  */
-static inline FusionVector FusionCalibrationMagnetic(const FusionVector uncalibrated, const FusionMatrix softIronMatrix, const FusionVector hardIronOffset) {
-    return FusionMatrixMultiplyVector(softIronMatrix, FusionVectorSubtract(uncalibrated, hardIronOffset));
+static inline madVector madCalibrationMagnetic(const madVector uncalibrated, const madMatrix softIronMatrix, const madVector hardIronOffset) {
+    return madMatrixMultiplyVector(softIronMatrix, madVectorSubtract(uncalibrated, hardIronOffset));
 }
 
-// #endif
-
 //------------------------------------------------------------------------------
-// End of file
 
 /**
- * @file FusionCompass.h
- * @author Seb Madgwick
  * @brief Tilt-compensated compass to calculate the magnetic heading using
  * accelerometer and magnetometer measurements.
  */
 
-// #ifndef FUSION_COMPASS_H
-// #define FUSION_COMPASS_H
-
-//------------------------------------------------------------------------------
-// Includes
-
-// #include "FusionConvention.h"
-// #include "FusionMath.h"
-
 //------------------------------------------------------------------------------
 // Function declarations
 
-float FusionCompassCalculateHeading(const FusionConvention convention, const FusionVector accelerometer, const FusionVector magnetometer);
-
-// #endif
+float FusionCompassCalculateHeading(const EarthConvention convention, const madVector accelerometer, const madVector magnetometer);
 
 //------------------------------------------------------------------------------
-// End of file
-
-
-
 /**
- * @file FusionOffset.h
- * @author Seb Madgwick
  * @brief Gyroscope offset correction algorithm for run-time calibration of the
  * gyroscope offset.
  */
 
-// #ifndef FUSION_OFFSET_H
-// #define FUSION_OFFSET_H
-
 //------------------------------------------------------------------------------
-// Includes
-
-// #include "FusionMath.h"
-
-//------------------------------------------------------------------------------
-// Definitions
-
-/**
- * @brief Gyroscope offset algorithm structure.  Structure members are used
- * internally and must not be accessed by the application.
- */
-typedef struct {
-    float filterCoefficient;
-    unsigned int timeout;
-    unsigned int timer;
-    FusionVector gyroscopeOffset;
-} FusionOffset;
 
 //------------------------------------------------------------------------------
 // Function declarations
 
-void FusionOffsetInitialise(FusionOffset *const offset, const unsigned int sampleRate);
+void madOffsetInitialise(madOffset *const offset, const unsigned int sampleRate);
 
-FusionVector FusionOffsetUpdate(FusionOffset *const offset, FusionVector gyroscope);
+madVector madOffsetUpdate(madOffset *const offset, madVector gyroscope);
 
 #endif
 
