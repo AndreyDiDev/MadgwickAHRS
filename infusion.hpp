@@ -623,6 +623,14 @@ madAhrsFlags madAhrsGetFlags(const madAhrs *const ahrs);
 
 void madAhrsSetHeading(madAhrs *const ahrs, const float heading);
 
+static inline madVector HalfGravity(const madAhrs *const ahrs);
+
+static inline madVector HalfMagnetic(const madAhrs *const ahrs);
+
+static inline madVector Feedback(const madVector sensor, const madVector reference);
+
+static inline int Clamp(const int value, const int min, const int max);
+
 
 //------------------------------------------------------------------------------
 /**

@@ -5,7 +5,7 @@
  * @brief AHRS algorithm to combine gyroscope, accelerometer, and magnetometer
  * measurements into a single measurement of orientation relative to the Earth.
  * 
- * Implementation of Madgwick's IMU and AHRS algorithms.
+ * Modified Implementation of Madgwick's IMU and AHRS algorithms.
  * See: https://x-io.co.uk/open-source-imu-and-ahrs-algorithms/
  */
 
@@ -51,17 +51,6 @@
 #define THRESHOLD (3.0f)
 
 #define MAX_LINE_LENGTH 1024
-
-//------------------------------------------------------------------------------
-// Function declarations
-
-static inline madVector HalfGravity(const madAhrs *const ahrs);
-
-static inline madVector HalfMagnetic(const madAhrs *const ahrs);
-
-static inline madVector Feedback(const madVector sensor, const madVector reference);
-
-static inline int Clamp(const int value, const int min, const int max);
 
 //------------------------------------------------------------------------------
 // Functions
