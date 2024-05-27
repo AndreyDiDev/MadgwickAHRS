@@ -109,7 +109,7 @@ typedef union {
 /**
  * @brief Identity matrix.
  */
-#define FUSION_IDENTITY_MATRIX ((madMatrix){ .array = {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}} })
+#define IDENTITY_MATRIX ((madMatrix){ .array = {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}} })
 
 /**
  * @brief Euler angles of zero.
@@ -197,7 +197,7 @@ static inline float RadiansToDegrees(const float radians) {
  * @param value Value.
  * @return Arc sine of the value.
  */
-static inline float FusionAsin(const float value) {
+static inline float Asin(const float value) {
     if (value <= -1.0f) {
         return (float) M_PI / -2.0f;
     }
@@ -210,7 +210,7 @@ static inline float FusionAsin(const float value) {
 //------------------------------------------------------------------------------
 // Inline functions - Fast inverse square root
 
-#ifndef FUSION_USE_NORMAL_SQRT
+#ifndef NORMAL_SQRT
 
 /**
  * @brief Calculates the reciprocal of the square root.
@@ -218,7 +218,7 @@ static inline float FusionAsin(const float value) {
  * @param x Operand.
  * @return Reciprocal of the square root of x.
  */
-static inline float FusionFastInverseSqrt(const float x) {
+static inline float fastInverseSqrt(const float x) {
 
     typedef union {
         float f;
@@ -366,10 +366,10 @@ static inline float madVectorMagnitude(const madVector vector) {
  * @return Normalised vector.
  */
 static inline madVector madVectorNormalise(const madVector vector) {
-#ifdef FUSION_USE_NORMAL_SQRT
+#ifdef NORMAL_SQRT
     const float magnitudeReciprocal = 1.0f / sqrtf(madVectorMagnitudeSquared(vector));
 #else
-    const float magnitudeReciprocal = FusionFastInverseSqrt(madVectorMagnitudeSquared(vector));
+    const float magnitudeReciprocal = fastInverseSqrt(madVectorMagnitudeSquared(vector));
 #endif
     return madVectorMultiplyScalar(vector, magnitudeReciprocal);
 }
@@ -443,10 +443,10 @@ static inline madQuaternion madQuaternionMultiplyVector(const madQuaternion quat
  */
 static inline madQuaternion madQuaternionNormalise(const madQuaternion quaternion) {
 #define Q quaternion.element
-#ifdef FUSION_USE_NORMAL_SQRT
+#ifdef NORMAL_SQRT
     const float magnitudeReciprocal = 1.0f / sqrtf(Q.w * Q.w + Q.x * Q.x + Q.y * Q.y + Q.z * Q.z);
 #else
-    const float magnitudeReciprocal = FusionFastInverseSqrt(Q.w * Q.w + Q.x * Q.x + Q.y * Q.y + Q.z * Q.z);
+    const float magnitudeReciprocal = fastInverseSqrt(Q.w * Q.w + Q.x * Q.x + Q.y * Q.y + Q.z * Q.z);
 #endif
     const madQuaternion result = {.element = {
             .w = Q.w * magnitudeReciprocal,
@@ -520,7 +520,7 @@ static inline madEuler madQuaternionToEuler(const madQuaternion quaternion) {
     const float halfMinusQySquared = 0.5f - Q.y * Q.y; // calculate common terms to avoid repeated operations
     const madEuler euler = {.angle = {
             .roll = RadiansToDegrees(atan2f(Q.w * Q.x + Q.y * Q.z, halfMinusQySquared - Q.x * Q.x)),
-            .pitch = RadiansToDegrees(FusionAsin(2.0f * (Q.w * Q.y - Q.z * Q.x))),
+            .pitch = RadiansToDegrees(Asin(2.0f * (Q.w * Q.y - Q.z * Q.x))),
             .yaw = RadiansToDegrees(atan2f(Q.w * Q.z + Q.x * Q.y, halfMinusQySquared - Q.z * Q.z)),
     }};
     return euler;
@@ -533,9 +533,6 @@ static inline madEuler madQuaternionToEuler(const madQuaternion quaternion) {
  * @brief AHRS algorithm to combine gyroscope, accelerometer, and magnetometer
  * measurements into a single measurement of orientation relative to the Earth.
  */
-
-#ifndef FUSION_AHRS_H
-#define FUSION_AHRS_H
 
 //------------------------------------------------------------------------------
 
@@ -643,7 +640,7 @@ void madAhrsSetHeading(madAhrs *const ahrs, const float heading);
  * @param alignment Axes alignment.
  * @return Sensor axes aligned with the body axes.
  */
-static inline madVector FusionAxesSwap(const madVector sensor, const MadAxesAlignment alignment) {
+static inline madVector AxesSwitch(const madVector sensor, const MadAxesAlignment alignment) {
     madVector result;
     switch (alignment) {
         case MadAxesAlignmentPXPYPZ:
@@ -809,7 +806,7 @@ static inline madVector madCalibrationMagnetic(const madVector uncalibrated, con
 //------------------------------------------------------------------------------
 // Function declarations
 
-float FusionCompassCalculateHeading(const EarthConvention convention, const madVector accelerometer, const madVector magnetometer);
+float compassCalculateHeading(const EarthConvention convention, const madVector accelerometer, const madVector magnetometer);
 
 //------------------------------------------------------------------------------
 /**
@@ -825,8 +822,3 @@ float FusionCompassCalculateHeading(const EarthConvention convention, const madV
 void madOffsetInitialise(madOffset *const offset, const unsigned int sampleRate);
 
 madVector madOffsetUpdate(madOffset *const offset, madVector gyroscope);
-
-#endif
-
-//------------------------------------------------------------------------------
-// End of file

@@ -526,10 +526,10 @@ madVector madAhrsGetEarthAcceleration(const madAhrs *const ahrs) {
  */
 madAhrsInternalStates madAhrsGetInternalStates(const madAhrs *const ahrs) {
     const madAhrsInternalStates internalStates = {
-            .accelerationError = RadiansToDegrees(FusionAsin(2.0f * madVectorMagnitude(ahrs->halfAccelerometerFeedback))),
+            .accelerationError = RadiansToDegrees(Asin(2.0f * madVectorMagnitude(ahrs->halfAccelerometerFeedback))),
             .accelerometerIgnored = ahrs->accelerometerIgnored,
             .accelerationRecoveryTrigger = ahrs->settings.recoveryTriggerPeriod == 0 ? 0.0f : (float) ahrs->accelerationRecoveryTrigger / (float) ahrs->settings.recoveryTriggerPeriod,
-            .magneticError = RadiansToDegrees(FusionAsin(2.0f * madVectorMagnitude(ahrs->halfMagnetometerFeedback))),
+            .magneticError = RadiansToDegrees(Asin(2.0f * madVectorMagnitude(ahrs->halfMagnetometerFeedback))),
             .magnetometerIgnored = ahrs->magnetometerIgnored,
             .magneticRecoveryTrigger = ahrs->settings.recoveryTriggerPeriod == 0 ? 0.0f : (float) ahrs->magneticRecoveryTrigger / (float) ahrs->settings.recoveryTriggerPeriod,
     };
@@ -588,7 +588,7 @@ void madAhrsSetHeading(madAhrs *const ahrs, const float heading) {
  * @param magnetometer Magnetometer measurement in any calibrated units.
  * @return Heading angle in degrees.
  */
-float FusionCompassCalculateHeading(const EarthConvention convention, const madVector accelerometer, const madVector magnetometer) {
+float compassCalculateHeading(const EarthConvention convention, const madVector accelerometer, const madVector magnetometer) {
     switch (convention) {
         case EarthConventionNwu: {
             const madVector west = madVectorNormalise(madVectorCrossProduct(accelerometer, magnetometer));
@@ -963,7 +963,7 @@ int main() {
     };
     madAhrsSetSettings(&ahrs, &settings);
 
-    FILE *file1 = fopen("C:/Users/Andrey/Documents/Fusion-main_new/Fusion-main/Python/sensor_data.csv", "r");
+    FILE *file1 = fopen("C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/sensor_data.csv", "r");
     if (!file1) {
         perror("Error opening file");
         return 1;
