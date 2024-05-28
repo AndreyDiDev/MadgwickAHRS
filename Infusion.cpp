@@ -1,9 +1,9 @@
 /**
  * @co-author Andrey Dimanchev
- * @file madAhrs.c
+ * @file infusion.cpp
  * @author Seb Madgwick
  * @brief AHRS algorithm to combine gyroscope, accelerometer, and magnetometer
- * measurements into a single measurement of orientation relative to the Earth.
+ * measurements into a filtered orientation relative to the Earth's frame of reference
  * 
  * Modified Implementation of Madgwick's IMU and AHRS algorithms.
  * See: https://x-io.co.uk/open-source-imu-and-ahrs-algorithms/
@@ -52,9 +52,7 @@
 
 #define MAX_LINE_LENGTH 1024
 
-//------------------------------------------------------------------------------
-// Functions
-
+// Functions--------------------------------------------------------------------
 /**
  * @brief Initialises the AHRS algorithm structure.
  * @param ahrs AHRS algorithm structure.
@@ -567,9 +565,7 @@ void madAhrsSetHeading(madAhrs *const ahrs, const float heading) {
  * accelerometer and magnetometer measurements.
  */
 
-//------------------------------------------------------------------------------
-// Functions
-
+// Functions--------------------------------------------------------------------
 /**
  * @brief Calculates the magnetic heading.
  * @param convention Earth axes convention.
@@ -608,9 +604,7 @@ float compassCalculateHeading(const EarthConvention convention, const madVector 
  */
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// Functions
-
+// Functions--------------------------------------------------------------------
 /**
  * @brief Initialises the gyroscope offset algorithm.
  * @param offset Gyroscope offset algorithm structure.
@@ -652,9 +646,8 @@ madVector madOffsetUpdate(madOffset *const offset, madVector gyroscope) {
     return gyroscope;
 }
 
-//------------------------------------------------------------------------------
+// Test Class-------------------------------------------------------------------
 
-// test class
 #define SAMPLE_RATE (100) // replace this with actual sample rate
 
 void test(madMatrix gyroscopeMisalignment,

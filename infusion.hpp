@@ -1,20 +1,18 @@
 /**
  * @co-author Andrey Dimanchev
- * @file last.hpp
+ * @file infusion.hpp
  * @author Seb Madgwick
- * @brief Earth axes convention.
+ * 
+ * /**
+ * @brief AHRS algorithm to combine gyroscope, accelerometer, and magnetometer
+ * measurements into a filtered orientation relative to the Earth's frame of reference
  */
+// -----------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-
-/**
- * @brief Math library
- */
-
-//------------------------------------------------------------------------------
+//Math--------------------------------------------------------------------------
 // Includes
 
-#include <math.h> // M_PI, sqrtf, atan2f, asinf
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -91,34 +89,16 @@ typedef union {
     } angle;
 } madEuler;
 
-/**
- * @brief Vector of zeros.
- */
 #define VECTOR_ZERO ((madVector){ .array = {0.0f, 0.0f, 0.0f} })
 
-/**
- * @brief Vector of ones.
- */
 #define VECTOR_ONES ((madVector){ .array = {1.0f, 1.0f, 1.0f} })
 
-/**
- * @brief Identity quaternion.
- */
 #define IDENTITY_QUATERNION ((madQuaternion){ .array = {1.0f, 0.0f, 0.0f, 0.0f} })
 
-/**
- * @brief Identity matrix.
- */
 #define IDENTITY_MATRIX ((madMatrix){ .array = {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}} })
 
-/**
- * @brief Euler angles of zero.
- */
 #define EULER_ZERO ((madEuler){ .array = {0.0f, 0.0f, 0.0f} })
 
-/**
- * @brief Pi. May not be defined in math.h.
- */
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
 #endif
@@ -167,10 +147,72 @@ typedef struct {
     madVector gyroscopeOffset;
 } madOffset;
 
+// Definitions
+typedef struct {
+    float time;
+    float gyroX, gyroY, gyroZ;
+    float accelX, accelY, accelZ;
+    float magX, magY, magZ;
+}SensorData;
+
+/**
+ * @brief AHRS algorithm settings.
+ */
+typedef struct {
+    EarthConvention convention;
+    float gain;
+    float gyroscopeRange;
+    float accelerationRejection;
+    float magneticRejection;
+    unsigned int recoveryTriggerPeriod;
+} madAhrsSettings;
+
+/**
+ * @brief AHRS algorithm structure.  Structure members are used internally and
+ * must not be accessed by the application.
+ */
+typedef struct {
+    madAhrsSettings settings;
+    madQuaternion quaternion;
+    madVector accelerometer;
+    bool initialising;
+    float rampedGain;
+    float rampedGainStep;
+    bool angularRateRecovery;
+    madVector halfAccelerometerFeedback;
+    madVector halfMagnetometerFeedback;
+    bool accelerometerIgnored;
+    int accelerationRecoveryTrigger;
+    int accelerationRecoveryTimeout;
+    bool magnetometerIgnored;
+    int magneticRecoveryTrigger;
+    int magneticRecoveryTimeout;
+} madAhrs;
+
+/**
+ * @brief AHRS algorithm internal states.
+ */
+typedef struct {
+    float accelerationError;
+    bool accelerometerIgnored;
+    float accelerationRecoveryTrigger;
+    float magneticError;
+    bool magnetometerIgnored;
+    float magneticRecoveryTrigger;
+} madAhrsInternalStates;
+
+/**
+ * @brief AHRS algorithm flags.
+ */
+typedef struct {
+    bool initialising;
+    bool angularRateRecovery;
+    bool accelerationRecovery;
+    bool magneticRecovery;
+} madAhrsFlags;
+
 
 //------------------------------------------------------------------------------
-// Inline functions - Degrees and radians conversion
-
 /**
  * @brief Converts degrees to radians.
  * @param degrees Degrees.
@@ -190,7 +232,6 @@ static inline float RadiansToDegrees(const float radians) {
 }
 
 //------------------------------------------------------------------------------
-// Inline functions - Arc sine
 
 /**
  * @brief Returns the arc sine of the value.
@@ -208,7 +249,6 @@ static inline float Asin(const float value) {
 }
 
 //------------------------------------------------------------------------------
-// Inline functions - Fast inverse square root
 
 #ifndef NORMAL_SQRT
 
@@ -232,9 +272,7 @@ static inline float fastInverseSqrt(const float x) {
 
 #endif
 
-//------------------------------------------------------------------------------
-// Inline functions - Vector operations
-
+//Vector Operations-------------------------------------------------------------------------
 /**
  * @brief Returns true if the vector is zero.
  * @param vector Vector.
@@ -374,9 +412,7 @@ static inline madVector madVectorNormalise(const madVector vector) {
     return madVectorMultiplyScalar(vector, magnitudeReciprocal);
 }
 
-//------------------------------------------------------------------------------
-// Inline functions - Quaternion operations
-
+//Quaternion operations-----------------------------------------------------------------
 /**
  * @brief Returns the sum of two quaternions.
  * @param quaternionA Quaternion A.
@@ -458,9 +494,7 @@ static inline madQuaternion madQuaternionNormalise(const madQuaternion quaternio
 #undef Q
 }
 
-//------------------------------------------------------------------------------
-// Inline functions - Matrix operations
-
+// Matrix operations---------------------------------------------------------------
 /**
  * @brief Returns the multiplication of a matrix with a vector.
  * @param matrix Matrix.
@@ -478,9 +512,7 @@ static inline madVector madMatrixMultiplyVector(const madMatrix matrix, const ma
 #undef R
 }
 
-//------------------------------------------------------------------------------
-// Inline functions - Conversion operations
-
+//Conversion Operations----------------------------------------------------------------
 /**
  * @brief Converts a quaternion to a rotation matrix.
  * @param quaternion Quaternion.
@@ -527,81 +559,7 @@ static inline madEuler madQuaternionToEuler(const madQuaternion quaternion) {
 #undef Q
 }
 
-//------------------------------------------------------------------------------
-
-/**
- * @brief AHRS algorithm to combine gyroscope, accelerometer, and magnetometer
- * measurements into a single measurement of orientation relative to the Earth.
- */
-
-//------------------------------------------------------------------------------
-
-// Definitions
-typedef struct {
-    float time;
-    float gyroX, gyroY, gyroZ;
-    float accelX, accelY, accelZ;
-    float magX, magY, magZ;
-}SensorData;
-
-/**
- * @brief AHRS algorithm settings.
- */
-typedef struct {
-    EarthConvention convention;
-    float gain;
-    float gyroscopeRange;
-    float accelerationRejection;
-    float magneticRejection;
-    unsigned int recoveryTriggerPeriod;
-} madAhrsSettings;
-
-/**
- * @brief AHRS algorithm structure.  Structure members are used internally and
- * must not be accessed by the application.
- */
-typedef struct {
-    madAhrsSettings settings;
-    madQuaternion quaternion;
-    madVector accelerometer;
-    bool initialising;
-    float rampedGain;
-    float rampedGainStep;
-    bool angularRateRecovery;
-    madVector halfAccelerometerFeedback;
-    madVector halfMagnetometerFeedback;
-    bool accelerometerIgnored;
-    int accelerationRecoveryTrigger;
-    int accelerationRecoveryTimeout;
-    bool magnetometerIgnored;
-    int magneticRecoveryTrigger;
-    int magneticRecoveryTimeout;
-} madAhrs;
-
-/**
- * @brief AHRS algorithm internal states.
- */
-typedef struct {
-    float accelerationError;
-    bool accelerometerIgnored;
-    float accelerationRecoveryTrigger;
-    float magneticError;
-    bool magnetometerIgnored;
-    float magneticRecoveryTrigger;
-} madAhrsInternalStates;
-
-/**
- * @brief AHRS algorithm flags.
- */
-typedef struct {
-    bool initialising;
-    bool angularRateRecovery;
-    bool accelerationRecovery;
-    bool magneticRecovery;
-} madAhrsFlags;
-
-//------------------------------------------------------------------------------
-// Function declarations
+// Function declarations--------------------------------------------------------------
 
 void madAhrsInitialise(madAhrs *const ahrs);
 
@@ -639,9 +597,7 @@ static inline int Clamp(const int value, const int min, const int max);
 
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// Inline functions
-
+//Functions---------------------------------------------------------------------
 /**
  * @brief Swaps sensor axes for alignment with the body axes.
  * @param sensor Sensor axes.
@@ -778,9 +734,7 @@ static inline madVector AxesSwitch(const madVector sensor, const MadAxesAlignmen
  * @brief Gyroscope, accelerometer, and magnetometer calibration models.
  */
 
-//------------------------------------------------------------------------------
-// Inline functions
-
+//Functions---------------------------------------------------------------------
 /**
  * @brief Gyroscope and accelerometer calibration model.
  * @param uncalibrated Uncalibrated measurement.
@@ -811,8 +765,7 @@ static inline madVector madCalibrationMagnetic(const madVector uncalibrated, con
  * accelerometer and magnetometer measurements.
  */
 
-//------------------------------------------------------------------------------
-// Function declarations
+// Function declarations--------------------------------------------------------
 
 float compassCalculateHeading(const EarthConvention convention, const madVector accelerometer, const madVector magnetometer);
 
@@ -824,9 +777,10 @@ float compassCalculateHeading(const EarthConvention convention, const madVector 
 
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// Function declarations
+//Function declarations---------------------------------------------------------
 
 void madOffsetInitialise(madOffset *const offset, const unsigned int sampleRate);
 
 madVector madOffsetUpdate(madOffset *const offset, madVector gyroscope);
+
+// The End
