@@ -21,6 +21,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctime>
+#include <string>
 
 //------------------------------------------------------------------------------
 // Definitions
@@ -733,14 +734,14 @@ void test(madMatrix gyroscopeMisalignment,
         // printf("\n");
 }
 
-void testCircleInternal(madOffset offset, 
+void testNoMagInternal(madOffset offset, 
     madAhrs *ahrs,
-    SensorData data,
+    SensorDataNoMag data,
     FILE *file)
 {
     // Acquire latest sensor data
         // const clock_t timestamp = clock(); // replace this with actual gyroscope timestamp
-        const float timestamp = data.time;
+        const double timestamp = data.time;
         madVector gyroscope = {data.gyroX, data.gyroY, data.gyroZ}; // replace this with actual gyroscope data in degrees/s
         madVector accelerometer = {data.accelX, data.accelY, data.accelZ}; // replace this with actual accelerometer data in g
         madVector magnetometer = {data.magX, data.magY, data.magZ}; // replace this with actual magnetometer data in arbitrary units
@@ -771,12 +772,12 @@ void testCircleInternal(madOffset offset,
         //        earth.axis.x, earth.axis.y, earth.axis.z);
 
         // Calculate delta time (in seconds) to account for gyroscope sample clock error
-        static float previousTimestamp;
-        float deltaTime = (float) (timestamp - previousTimestamp);
+        static double previousTimestamp;
+        double deltaTime = (double) (timestamp - previousTimestamp);
         previousTimestamp = timestamp;
 
         // Update gyroscope AHRS algorithm
-        madAhrsUpdate(ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
+        madAhrsUpdateNoMagnetometer(ahrs, gyroscope, accelerometer, deltaTime);
 
         // printf("After Update - Time: %.6f s, Gyro: (%.6f, %.6f, %.6f) deg/s, Accel: (%.6f, %.6f, %.6f) g, Mag: (%.6f, %.4f, %.6f) uT, deltaT: %.10f\n",
         //     data.time, data.gyroX, data.gyroY, data.gyroZ, data.accelX, data.accelY, data.accelZ, data.magX, data.magY, data.magZ, deltaTime);
@@ -805,13 +806,23 @@ void testCircleInternal(madOffset offset,
 
 }
 
-void testCircle(){
+void testNoMag(){
 
-    FILE *fileCircle = fopen("circleInfusion.txt", "w+"); // Open the file for appending or create it if it doesn't exist
-    if (!fileCircle) {
+    FILE *fileOut = fopen("noMag1.txt", "w+"); 
+    if (!fileOut) {
         fprintf(stderr, "Error opening file...exiting\n");
         exit(1);
     }
+
+    // std::ifstream inputFile(fileOutName); // Opens the file
+    // if (inputFile.is_open()) {
+    //     // File opened successfully
+    //     // Read data from the file
+    //     // ...
+    //     inputFile.close(); // Close the file when done
+    // } else {
+    //     std::cout << "Error opening file." << std::endl;
+    // }
 
     // Initialise algorithms
     madOffset offset;
@@ -832,17 +843,18 @@ void testCircle(){
 
     madAhrsSetSettings(&ahrs, &settings);
 
-    FILE *fileCircleData = fopen("C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/circle.csv", "r");
-    if (!fileCircleData) {
-        perror("Error opening file");
-        // return 1;
-    }
+    FILE *fileIn = fopen("C:/Users/Andrey/Documents/AHRSRepo/MadgwickAHRS/newSims.csv", "r");
+
+    // if (!fileIn) {
+    //     perror("Error opening file");
+    //     // return 1;
+    // }
     // read first line and preset the deltaTime to timestamp 
     char line[MAX_LINE_LENGTH];
     std::clock_t start;
     double duration;
     
-    while (fgets(line, sizeof(line), fileCircleData)) {
+    while (fgets(line, sizeof(line), fileIn)) {
         // Tokenize the line using strtok
         char *token = strtok(line, ",");
         float time = atof(token); // Convert the time value to float
@@ -871,7 +883,7 @@ void testCircle(){
         // token = strtok(NULL, ",");
         // float magZ = atof(token);
 
-        SensorData sensorData = {
+        SensorDataNoMag sensorData = {
             time,
             gyroX,
             gyroY,
@@ -885,23 +897,24 @@ void testCircle(){
         };
 
         // Example: Print all sensor readings
-        // printf("Time: %.6f s, Gyro: (%.6f, %.6f, %.6f) deg/s, Accel: (%.6f, %.6f, %.6f) g, Mag: (%.6f, %.6f, %.6f) uT\n",
-        //        time, gyroX, gyroY, gyroZ, accelX, accelY, accelZ, magX, magY, magZ);
+        printf("Time: %.6f s, Gyro: (%.6f, %.6f, %.6f) deg/s, Accel: (%.6f, %.6f, %.6f) g\n",
+               time, gyroX, gyroY, gyroZ, accelX, accelY, accelZ);
+
         start = std::clock();
 
-        testCircleInternal(offset, &ahrs, sensorData, fileCircle);
+        testNoMagInternal(offset, &ahrs, sensorData, fileOut);
 
         clock_t endTime = std::clock();
 
         duration += endTime - start;
 
-        printf("Time for one more circle (seconds): %f\n", duration/CLOCKS_PER_SEC);
+        printf("Time for noMag (seconds): %f\n", duration/CLOCKS_PER_SEC);
     }
 
-    printf("Final for circle (1.7k samples): %f", duration/CLOCKS_PER_SEC);
+    printf("Final for noMag: %f", duration/CLOCKS_PER_SEC);
 
-    fclose(fileCircle);
-    fclose(fileCircleData);
+    fclose(fileIn);
+    fclose(fileOut);
 
 }
 
@@ -1018,6 +1031,8 @@ int main() {
     fclose(file1);
     fclose(file);
 
-    testCircle();
+    testNoMag();
+
+    // testCircle();
 
 }

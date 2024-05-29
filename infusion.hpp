@@ -155,6 +155,13 @@ typedef struct {
     float magX, magY, magZ;
 }SensorData;
 
+typedef struct {
+    double time;
+    float gyroX, gyroY, gyroZ;
+    float accelX, accelY, accelZ;
+    float magX, magY, magZ;
+}SensorDataNoMag;
+
 /**
  * @brief AHRS algorithm settings.
  */
