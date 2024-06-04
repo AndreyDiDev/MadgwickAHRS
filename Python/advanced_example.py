@@ -242,8 +242,32 @@ ax1.legend()
 
 timeS = timestamp[:543]
 
+dataEverest = numpy.genfromtxt("C:/Users/Andrey/Documents/EverestRepo/Apogee-Detection-Everest/MadgwickLibrary/IMU_BARO_ALT.csv", delimiter=",", skip_header=1)
+
+i, j = 0, 0
+new = numpy.empty((543, 1))
+
+for i in range(len(new[:])):
+    
+    j = i * 10
+    
+    if(j < len(dataEverest[:])):
+        new[i] = dataEverest[j, 11]
+    
+    # while(j < (i + 1) * 10) and (j < len(dataEverest[:])):
+    #     sum  = dataEverest[j, 11]
+    #     j = j + 1
+    #     print(sum, i, j)
+        
+    # new[i] = sum / 10
+    # print(new[i], i, j)
+    
+seaLevelPressure = 1013.25 * 1000; # sea level pressure in hPa
+altitudeReal = 44330.0 * (1.0 - pow(new / seaLevelPressure, 0.190284))
+
 ax2.plot(timeS, altitudeBaro * 0.3048, label = 'Baro', color='blue')
-ax2.set_title('Baro altitude')
+ax2.plot(timeS, altitudeReal * 0.3048, label = 'Everest', color='red')
+ax2.set_title('Baro and Everest altitude')
 ax2.set_xlabel('Time (s)')
 ax2.set_ylabel('meters')
 ax2.grid(True)
