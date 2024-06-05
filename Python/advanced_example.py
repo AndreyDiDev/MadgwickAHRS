@@ -285,3 +285,10 @@ ax2.legend()
 
 pyplot.tight_layout()
 pyplot.show()
+
+theP = 90923
+
+seaLevelPressure = 1013.25 * 1000; # sea level pressure in hPa
+theAlt = 44330.0 * (1.0 - pow(theP / seaLevelPressure, 0.190284))
+print(theAlt * 0.3048)
+print(altitudeBaro * 0.3048)
