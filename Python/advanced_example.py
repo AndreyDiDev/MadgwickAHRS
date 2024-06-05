@@ -159,7 +159,7 @@ fig, (ax1, ax2) = pyplot.subplots(2, 1, figsize=(8, 6))
 ax1.plot(timestamp, gyroscope[:, 0], label='GyroX', color='red')
 ax1.plot(timestamp, gyroscope[:, 1], label='GyroY', color='green')
 ax1.plot(timestamp, gyroscope[:, 2], label='GyroZ', color='blue')
-ax1.set_title('Gyro Data')
+ax1.set_title('Gyro Data (milli-deg/s)')
 ax1.set_xlabel('Time (s)')
 ax1.set_ylabel('Angular Velocity')
 ax1.grid(True)
@@ -169,7 +169,7 @@ ax1.legend()
 ax2.plot(timestamp, accelerometer[:, 0], label='AccelerometerX', color='orange')
 ax2.plot(timestamp, accelerometer[:, 1], label='AccelerometerY', color='purple')
 ax2.plot(timestamp, accelerometer[:, 2], label='AccelerometerZ', color='brown')
-ax2.set_title('Accelerometer Data')
+ax2.set_title('Accelerometer Data (milli-G/s^2)')
 ax2.set_xlabel('Time (s)')
 ax2.set_ylabel('Acceleration')
 ax2.grid(True)
@@ -182,9 +182,17 @@ pyplot.show()
 # import altimeter data
 data1 = numpy.genfromtxt("C:/Users/Andrey/Documents/EverestRepo/Apogee-Detection-Everest/MadgwickLibrary/Altimeter.csv", delimiter=",", skip_header=1)
 
+dataC = numpy.genfromtxt("C:/Users/Andrey/Documents/Fusion-main_new/Fusion-main/Fusion/file12.txt", delimiter=",", skip_header=1)
+
+myData = numpy.genfromtxt("C:/Users/Andrey/Documents/EverestRepo/Apogee-Detection-Everest/MadgwickLibrary/everest2.txt", delimiter=",", skip_header=1)
+
 
 time = data1[:, 0]
 acceleration = data1[:, 1]
+
+accelerationC = dataC[:, 14]
+
+myAccel = myData[:, 14]
 
 # Convert to m/s²
 conversion_factor = 0.3048  # 1 ft/s² = 0.3048 m/s²
@@ -203,7 +211,9 @@ ax1.legend()
 
 # Plot accelerometer data
 ax2.plot(timestamp, (accelerometer[:, 0]/1000) * (-9.81), label = "Raw", color='orange')
-ax2.plot(timestamp, filteredEarthAcceleration * (-9.81), label = "Filtered", color='purple')
+ax2.plot(timestamp, filteredEarthAcceleration * (-9.81), label = "Filtered-Python", color='purple')
+ax2.plot(timestamp, accelerationC * (-9.81), label = "Filtered-C", color='blue')
+ax2.plot(timestamp, myAccel * (-9.81), label = "Filtered-My version", color='black')
 # ax2.plot(timestamp, filteredLinearAcceleration, label = "Linear", color='green')
 ax2.set_title('Accel IMU')
 ax2.set_xlabel('Time (s)')
@@ -266,7 +276,7 @@ seaLevelPressure = 1013.25 * 1000; # sea level pressure in hPa
 altitudeReal = 44330.0 * (1.0 - pow(new / seaLevelPressure, 0.190284))
 
 ax2.plot(timeS, altitudeBaro * 0.3048, label = 'Baro', color='blue')
-ax2.plot(timeS, altitudeReal * 0.3048, label = 'Everest', color='red')
+# ax2.plot(timeS, altitudeReal * 0.3048, label = 'Everest', color='red')
 ax2.set_title('Baro and Everest altitude')
 ax2.set_xlabel('Time (s)')
 ax2.set_ylabel('meters')
