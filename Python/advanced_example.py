@@ -324,7 +324,7 @@ for i in range(len(new[:])):
 seaLevelPressure = 1013.25; # sea level pressure in hPa
 altitudeReal = 44330.0 * (1.0 - pow(new / seaLevelPressure, 0.190284))
 
-ax2.plot(timeS, altitudeBaro * 0.3048, label = 'Baro', color='blue')
+ax2.plot(timeS, altitudeBaro, label = 'Baro', color='blue')
 # ax2.plot(timeS, altitudeReal * 0.3048, label = 'Everest', color='red')
 ax2.set_title('Baro and Everest altitude')
 ax2.set_xlabel('Time (s)')
