@@ -11,6 +11,8 @@ import imufusion
 import matplotlib.pyplot as pyplot
 import numpy
 
+import scipy.integrate as integrate
+
 # Import sensor data
 data = numpy.genfromtxt("C:/Users/Andrey/Documents/Fusion-main_new/Fusion-main/Fusion/Imu 1.csv", delimiter=",", skip_header=1)
 
@@ -193,6 +195,44 @@ acceleration = data1[:, 1]
 accelerationC = dataC[:, 14]
 
 myAccel = myData[:, 14]
+myAccel = myAccel * -1
+
+velo = numpy.empty((len(acceleration), 1))
+myAltitude = numpy.empty((len(acceleration), 1))
+delta_t= 1/100
+
+acceleration = acceleration * 9.81  # in m/s²
+
+# for i in  range(len(myAccel)):
+#     accelerationS = myAccel[i] * 9.81 # in m/s
+#     velocity = myAccel[i-1]*9.81 + accelerationS * 1/3 # initial velo + (change in velo =previousAccel * time)
+#     myAltitude[i] =myAltitude[i-1] + velocity * 1/3 + accelerationS * 0.5 * (pow(1/3, 2))
+    
+for i in range(1, len(acceleration)):
+    velo[i] = velo[i-1] + acceleration[i] * delta_t
+    myAltitude[i] = myAltitude[i-1] + velo[i] * delta_t
+    
+# shrink plot from 5000 pts to 185
+time1 = numpy.empty((185, 1))
+newAltitude = numpy.empty((185, 1))
+
+i, j = 0, 0
+for i in range(len(time1)):
+    print(i)
+    
+    j = i * 27
+    
+    while(j < (i + 1) * 27) and (j < len(data1[:])):
+        sum  = myAltitude[j]
+        j = j + 1
+        print(sum, i, j)
+    
+    newAltitude[i] = sum / 27
+    
+    
+myVelocity = integrate.cumtrapz(acceleration, dx=1/100, initial=0)
+
+myAlt = integrate.cumtrapz(myVelocity, dx=1/100, initial=0)
 
 # Convert to m/s²
 conversion_factor = 0.3048  # 1 ft/s² = 0.3048 m/s²
@@ -227,11 +267,12 @@ pyplot.show()
 #########################################################################
 dataBaro = numpy.genfromtxt("C:/Users/Andrey/Documents/EverestRepo/Apogee-Detection-Everest/MadgwickLibrary/baro 3.csv", delimiter=",", skip_header=1)
 # graph altitude 
-height = data1[:, 3]
+height = data1[:, 4]
 
 pressure = dataBaro[:, 0] # in Pa
 
-seaLevelPressure = 1013.25 * 1000; # sea level pressure in hPa
+
+seaLevelPressure = 1013.25 ; # sea level pressure in hPa
 altitudeBaro = 44330.0 * (1.0 - pow(pressure / seaLevelPressure, 0.190284))
 
 # Convert to m
@@ -240,7 +281,7 @@ altitudeBaro = 44330.0 * (1.0 - pow(pressure / seaLevelPressure, 0.190284))
 # height_m = height * 0.3048
 
 # Create subplots
-fig, (ax1, ax2) = pyplot.subplots(2, 1, figsize=(8, 6), sharex=True)
+fig, (ax1, ax2, ax3) = pyplot.subplots(3, 1, figsize=(8, 6), sharex=True)
 
 
 ax1.plot(time, height, label = "Altimeter", color='red')
@@ -275,13 +316,20 @@ for i in range(len(new[:])):
 seaLevelPressure = 1013.25 * 1000; # sea level pressure in hPa
 altitudeReal = 44330.0 * (1.0 - pow(new / seaLevelPressure, 0.190284))
 
-ax2.plot(timeS, altitudeBaro * 0.3048, label = 'Baro', color='blue')
+ax2.plot(timeS, altitudeBaro, label = 'Baro', color='blue')
 # ax2.plot(timeS, altitudeReal * 0.3048, label = 'Everest', color='red')
 ax2.set_title('Baro and Everest altitude')
 ax2.set_xlabel('Time (s)')
 ax2.set_ylabel('meters')
 ax2.grid(True)
 ax2.legend()
+
+ax3.plot(range(len(newAltitude)), newAltitude, label = "", color='red')
+ax3.set_title('Everest Altitude')
+ax3.set_xlabel('Time (s)')
+ax3.set_ylabel('Acceleration')
+ax3.grid(True)
+ax3.legend()
 
 pyplot.tight_layout()
 pyplot.show()
@@ -292,3 +340,10 @@ seaLevelPressure = 1013.25 * 1000; # sea level pressure in hPa
 theAlt = 44330.0 * (1.0 - pow(theP / seaLevelPressure, 0.190284))
 print(theAlt * 0.3048)
 print(altitudeBaro * 0.3048)
+
+# import CoolProp.CoolProp as cp
+
+# # can i get code for the live
+
+
+# pressure = cp.PropSI('P', 'T', 300, "D", density, 'AIR')
