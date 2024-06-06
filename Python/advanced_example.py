@@ -152,7 +152,7 @@ plot_bool(axes[10], timestamp, flags[:, 3], "Magnetic recovery")
 
 pyplot.show(block="no_block" not in sys.argv)  # don't block when script run by CI
 
-#########################################################################
+######################################################################### RAW
 
 # Create subplots
 fig, (ax1, ax2) = pyplot.subplots(2, 1, figsize=(8, 6))
@@ -180,7 +180,7 @@ ax2.legend()
 pyplot.tight_layout()
 pyplot.show()
 
-#########################################################################
+######################################################################### ACCELERATION
 # import altimeter data
 data1 = numpy.genfromtxt("C:/Users/Andrey/Documents/EverestRepo/Apogee-Detection-Everest/MadgwickLibrary/Altimeter.csv", delimiter=",", skip_header=1)
 
@@ -222,12 +222,14 @@ for i in range(len(time1)):
     
     j = i * 27
     
-    while(j < (i + 1) * 27) and (j < len(data1[:])):
-        sum  = myAltitude[j]
-        j = j + 1
-        print(sum, i, j)
+    # while(j < (i + 1) * 27) and (j < len(data1[:])):
+    #     sum  = myAltitude[j]
+    #     j = j + 1
+    #     print(sum, i, j)
     
-    newAltitude[i] = sum / 27
+    # newAltitude[i] = sum / 27
+    
+    newAltitude[i] = myAltitude[j]
     
     
 myVelocity = integrate.cumtrapz(acceleration, dx=1/100, initial=0)
@@ -264,16 +266,22 @@ ax2.legend()
 pyplot.tight_layout()
 pyplot.show()
 
-#########################################################################
+######################################################################### ALTITUDE
 dataBaro = numpy.genfromtxt("C:/Users/Andrey/Documents/EverestRepo/Apogee-Detection-Everest/MadgwickLibrary/baro 3.csv", delimiter=",", skip_header=1)
 # graph altitude 
 height = data1[:, 4]
 
 pressure = dataBaro[:, 0] # in Pa
 
+# H = 44330 * [1 - (P/p0)^(1/5.255) ]
+seaLevelPressure = 1013.25; # sea level pressure in hPa
+pressure = pressure / 100
+# altitudeBaro = 44330.0 * (1.0 - pow(pressure / seaLevelPressure, 0.190284))
+altitudeBaro = 44330.0 * (1.0 - (pressure / seaLevelPressure)** 0.190284)
 
-seaLevelPressure = 1013.25 ; # sea level pressure in hPa
-altitudeBaro = 44330.0 * (1.0 - pow(pressure / seaLevelPressure, 0.190284))
+pressure = pressure * 100
+
+# altitudeBaro = 44331.5 - 4946.62 * (pressure / 1013.25) ** 0.190263
 
 # Convert to m
 # altitudeBaro = 
@@ -313,10 +321,10 @@ for i in range(len(new[:])):
     # new[i] = sum / 10
     # print(new[i], i, j)
     
-seaLevelPressure = 1013.25 * 1000; # sea level pressure in hPa
+seaLevelPressure = 1013.25; # sea level pressure in hPa
 altitudeReal = 44330.0 * (1.0 - pow(new / seaLevelPressure, 0.190284))
 
-ax2.plot(timeS, altitudeBaro, label = 'Baro', color='blue')
+ax2.plot(timeS, altitudeBaro * 0.3048, label = 'Baro', color='blue')
 # ax2.plot(timeS, altitudeReal * 0.3048, label = 'Everest', color='red')
 ax2.set_title('Baro and Everest altitude')
 ax2.set_xlabel('Time (s)')
@@ -339,7 +347,22 @@ theP = 90923
 seaLevelPressure = 1013.25 * 1000; # sea level pressure in hPa
 theAlt = 44330.0 * (1.0 - pow(theP / seaLevelPressure, 0.190284))
 print(theAlt * 0.3048)
-print(altitudeBaro * 0.3048)
+print(altitudeBaro)
+
+#################################################################### BARO V ALT PRESSURE
+fig, (ax1) = pyplot.subplots(1, 1, figsize=(8, 6), sharex=True)
+
+
+ax1.plot(range(len(pressure)), pressure, label = "Baro Pascals", color='red')
+ax1.plot(range(len(data1[:, 2])), data1[:, 2], label = "Altimeter", color='blue')
+ax1.set_title('Alt height')
+ax1.set_xlabel('Time (s)')
+ax1.set_ylabel('pascals')
+ax1.grid(True)
+ax1.legend()
+
+pyplot.tight_layout()
+pyplot.show()
 
 # import CoolProp.CoolProp as cp
 
