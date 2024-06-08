@@ -195,13 +195,15 @@ acceleration = data1[:, 1]
 accelerationC = dataC[:, 14]
 
 myAccel = myData[:, 14]
-myAccel = myAccel * -1
+# myAccel = myAccel * -1
 
 velo = numpy.empty((len(acceleration), 1))
 myAltitude = numpy.empty((len(acceleration), 1))
 delta_t= 1/100
 
 acceleration = acceleration * 9.81  # in m/s²
+
+newAcc = acceleration / 9.81
 
 # for i in  range(len(myAccel)):
 #     accelerationS = myAccel[i] * 9.81 # in m/s
@@ -244,7 +246,8 @@ acceleration_m = acceleration
 fig, (ax1, ax2) = pyplot.subplots(2, 1, figsize=(8, 6), sharex=True)
 
 # Plot data
-ax1.plot(time, acceleration_m, color='red')
+acceleration_m = data1[:, 1]
+ax1.plot(time, newAcc, color='red')
 ax1.set_title('Alt Accel')
 ax1.set_xlabel('Time (s)')
 ax1.set_ylabel('Acceleration')
@@ -255,7 +258,7 @@ ax1.legend()
 ax2.plot(timestamp, (accelerometer[:, 0]/1000) * (-9.81), label = "Raw", color='orange')
 ax2.plot(timestamp, filteredEarthAcceleration * (-9.81), label = "Filtered-Python", color='purple')
 ax2.plot(timestamp, accelerationC * (-9.81), label = "Filtered-C", color='blue')
-ax2.plot(timestamp, myAccel * (-9.81), label = "Filtered-My version", color='black')
+ax2.plot(timestamp, myAccel * (9.81), label = "Filtered-My version", color='black')
 # ax2.plot(timestamp, filteredLinearAcceleration, label = "Linear", color='green')
 ax2.set_title('Accel IMU')
 ax2.set_xlabel('Time (s)')
