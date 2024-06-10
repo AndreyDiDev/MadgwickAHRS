@@ -273,32 +273,39 @@ pyplot.show()
 dataBaro = numpy.genfromtxt("C:/Users/Andrey/Documents/EverestRepo/Apogee-Detection-Everest/MadgwickLibrary/baro 3.csv", delimiter=",", skip_header=1)
 # graph altitude 
 height = data1[:, 3]
+timeAltimeter = data1[:, 0]
 
 pressure = dataBaro[:, 0] # in Pa
-# pressure = pressure[]
 
 newTime = myData[:, 0]
 
 myAltitude = myData[:, 15]
 
-# H = 44330 * [1 - (P/p0)^(1/5.255) ]
+
 seaLevelPressure = 1013.25; # sea level pressure in hPa
 pressure = pressure / 100
 altitudeBaro = 44330.0 * (1.0 - pow(pressure / seaLevelPressure, 0.190284))
-# altitudeBaro = 44330.0 * (1.0 - (pressure / seaLevelPressure)** 0.190284)
 
 pressure = pressure * 100
-
-# altitudeBaro = 44331.5 - 4946.62 * (pressure / 1013.25) ** 0.190263
-
-# Convert to m
-# altitudeBaro = 
-
-# height_m = height * 0.3048
 
 # Create subplots
 fig, (ax1, ax2, ax3) = pyplot.subplots(3, 1, figsize=(8, 6), sharex=True)
 
+def annot_max(x,y, ax=None):
+    xmax = x[numpy.argmax(y)]
+    ymax = y.max()
+    text= "x={:.3f}, y={:.3f}".format(xmax, ymax)
+    if not ax:
+        ax=pyplot.gca()
+    bbox_props = dict(boxstyle="square,pad=0.3", fc="w", ec="k", lw=0.27)
+    arrowprops=dict(arrowstyle="->",connectionstyle="angle,angleA=0,angleB=60")
+    kw = dict(xycoords='data',textcoords="axes fraction",
+              arrowprops=arrowprops, bbox=bbox_props, ha="right", va="top")
+    ax.annotate(text, xy=(xmax, ymax), xytext=(0.94,0.96), **kw)
+    
+annot_max(timeAltimeter,height, ax1)
+# annot_max(newTime,altitudeBaro, ax2)
+annot_max(newTime,myAltitude, ax2)
 
 ax1.plot(time, height, label = "Altimeter", color='red')
 ax1.set_title('Alt height')
