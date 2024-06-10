@@ -258,7 +258,7 @@ ax1.legend()
 ax2.plot(timestamp, (accelerometer[:, 0]/1000) * (-9.81), label = "Raw", color='orange')
 ax2.plot(timestamp, filteredEarthAcceleration * (-9.81), label = "Filtered-Python", color='purple')
 ax2.plot(timestamp, accelerationC * (-9.81), label = "Filtered-C", color='blue')
-ax2.plot(timestamp, myAccel * (9.81), label = "Filtered-My version", color='black')
+# ax2.plot(timestamp, myAccel * -9.81, label = "Filtered-My version", color='black')
 # ax2.plot(timestamp, filteredLinearAcceleration, label = "Linear", color='green')
 ax2.set_title('Accel IMU')
 ax2.set_xlabel('Time (s)')
@@ -272,15 +272,20 @@ pyplot.show()
 ######################################################################### ALTITUDE
 dataBaro = numpy.genfromtxt("C:/Users/Andrey/Documents/EverestRepo/Apogee-Detection-Everest/MadgwickLibrary/baro 3.csv", delimiter=",", skip_header=1)
 # graph altitude 
-height = data1[:, 4]
+height = data1[:, 3]
 
 pressure = dataBaro[:, 0] # in Pa
+# pressure = pressure[]
+
+newTime = myData[:, 0]
+
+myAltitude = myData[:, 15]
 
 # H = 44330 * [1 - (P/p0)^(1/5.255) ]
 seaLevelPressure = 1013.25; # sea level pressure in hPa
 pressure = pressure / 100
-# altitudeBaro = 44330.0 * (1.0 - pow(pressure / seaLevelPressure, 0.190284))
-altitudeBaro = 44330.0 * (1.0 - (pressure / seaLevelPressure)** 0.190284)
+altitudeBaro = 44330.0 * (1.0 - pow(pressure / seaLevelPressure, 0.190284))
+# altitudeBaro = 44330.0 * (1.0 - (pressure / seaLevelPressure)** 0.190284)
 
 pressure = pressure * 100
 
@@ -327,8 +332,8 @@ for i in range(len(new[:])):
 seaLevelPressure = 1013.25; # sea level pressure in hPa
 altitudeReal = 44330.0 * (1.0 - pow(new / seaLevelPressure, 0.190284))
 
-ax2.plot(timeS, altitudeBaro, label = 'Baro', color='blue')
-# ax2.plot(timeS, altitudeReal * 0.3048, label = 'Everest', color='red')
+ax2.plot(newTime, altitudeBaro, label = 'Baro', color='blue')
+ax2.plot(newTime, myAltitude, label = 'Everest', color='red')
 ax2.set_title('Baro and Everest altitude')
 ax2.set_xlabel('Time (s)')
 ax2.set_ylabel('meters')
@@ -345,12 +350,12 @@ ax3.legend()
 pyplot.tight_layout()
 pyplot.show()
 
-theP = 90923
+theP = 90117 /100
 
-seaLevelPressure = 1013.25 * 1000; # sea level pressure in hPa
+seaLevelPressure = 1013.25; # sea level pressure in hPa
 theAlt = 44330.0 * (1.0 - pow(theP / seaLevelPressure, 0.190284))
-print(theAlt * 0.3048)
-print(altitudeBaro)
+# print(theAlt * 0.3048)
+print(theAlt)
 
 #################################################################### BARO V ALT PRESSURE
 fig, (ax1) = pyplot.subplots(1, 1, figsize=(8, 6), sharex=True)
