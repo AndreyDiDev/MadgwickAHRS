@@ -64,11 +64,11 @@ for index in range(len(timestamp)):
 
     ahrs_internal_states = ahrs.internal_states
     internal_states[index] = numpy.array([ahrs_internal_states.acceleration_error,
-                                          ahrs_internal_states.accelerometer_ignored,
-                                          ahrs_internal_states.acceleration_recovery_trigger,
+                                          ahrs_internal_states.accelerometer_ignored, #
+                                          ahrs_internal_states.acceleration_recovery_trigger, #
                                           ahrs_internal_states.magnetic_error,
-                                          ahrs_internal_states.magnetometer_ignored,
-                                          ahrs_internal_states.magnetic_recovery_trigger])
+                                          ahrs_internal_states.magnetometer_ignored, #
+                                          ahrs_internal_states.magnetic_recovery_trigger]) #
 
     ahrs_flags = ahrs.flags
     flags[index] = numpy.array([ahrs_flags.initialising,
